@@ -1,0 +1,6 @@
+As indicated in this article, component.yaml need to be changed to get information from "Metric Servers" 
+
+https://thospfuller.com/2020/11/29/easy-kubernetes-metrics-server-install-in-minikube-in-five-steps/
+
+
+Step: Once Minikube is installed, run: kubectl apply -f components.yaml

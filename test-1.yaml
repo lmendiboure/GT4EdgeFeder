@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-demo-2
+  namespace: expe   # Namespace spécifique
+spec:
+  containers:
+  - name: resource-demo-container
+    image: nginx
+    resources:
+      requests:
+        memory: "64Mi"    # Quantité de mémoire demandée
+        cpu: "250m"       # Quantité de CPU demandée (250 millicores = 0.25 cores)
+      limits:
+        memory: "128Mi"   # Limite maximale de mémoire
+        cpu: "500m"       # Limite maximale de CPU (500 millicores = 0.5 cores)
+  nodeSelector:
+    kubernetes.io/hostname: minikube-m02   # Sélectionnez le nœud par son nom
