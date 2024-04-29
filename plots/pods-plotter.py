@@ -47,7 +47,7 @@ def calculate_time_difference(file_path):
             timestamp_ms = convert_to_milliseconds(timestamp_str)
             
             # Process the event
-            if event == "Pending":
+            if event == "Running":
                 if pod not in pending_times:
                     pending_times[pod] = timestamp_ms
             elif event == "Terminated":
