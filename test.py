@@ -31,18 +31,19 @@ def launch_pod(namespace, node_name, duration):
             "containers": [
                 {
                     "name": "example-container",
-                    "image": "busybox",
-                    "command": ["sleep", str(duration)],
+                    "image": "python:3.9",
+                    "command": ["python", "-u", "-c",
+                        "import math; primes = [num for num in range(2, 100000) if all(num % i != 0 for i in range(2, int(math.sqrt(num)) + 1))]"],
                     "resources": {
                         "requests": {
                             "memory": "64Mi",
-                            "cpu": "250m"
+                            "cpu": "100m"
                         }
                     }
                 }
             ]
+            }
         }
-    }
 
     # Create the pod
     api_instance.create_namespaced_pod(namespace=namespace, body=pod_manifest)
@@ -109,8 +110,7 @@ def main():
     while True:
         node_name = random.choice(available_nodes)
         launch_pod(namespace, node_name, duration)
-        time.sleep(random.randint(6, 8))
+        time.sleep(random.randint(1, 3))
 
 if __name__ == "__main__":
     main()
-
