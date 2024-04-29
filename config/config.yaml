@@ -7,16 +7,15 @@ nodes_number: 3  # Number of nodes in the cluster
 memory: 32768 # RAM per node in MB
 cpus: 2  # Number of CPU cores per node
 
-# Configuration for pods
-pods_config:
-  - name: nginx
-    storage: 5000  # Storage capacity for the nginx pod in MB
-  - name: mysql
-    storage: 10000  # Storage capacity for the mysql pod in MB
-  - name: example-pod
-    storage: 12000  # Storage capacity for the mysql pod in MB
-
 # Configuration for experimentations results
 
 results_file_nodes: plots/results/data_nodes.csv
 results_file_pods: plots/results/data_pods.csv
+
+# Configuration for pods
+
+pods_config:
+  - name: example-pod
+    CPU: [100, 200, 300, 400]  # Set of CPU values in milli CPUs
+    RAM: [16, 20, 24, 30, 32]   # Set of RAM values in Mi
+    storage: 5000  # Storage capacity for the nginx pod in MB
