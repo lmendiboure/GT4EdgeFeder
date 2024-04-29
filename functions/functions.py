@@ -4,69 +4,23 @@ import yaml
 import time
 from kubernetes import client, config, watch
 from datetime import datetime
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv        
 
-def load_config(filename):
-    """
-    Load configuration from YAML file.
-
-    Args:
-        filename (str): Path to the YAML configuration file.
-
-    Returns:
-        dict: Configuration data.
-    """
-    with open(filename, 'r') as file:
-        config_data = yaml.safe_load(file)
-    return config_data
-    
-def convert_memory_usage_to_megabytes(memory_usage_bytes):
-    """
-    Convert memory usage from bytes to megabytes.
-
-    Args:
-        memory_usage_bytes (int): Memory usage in bytes.
-
-    Returns:
-        float: Memory usage in megabytes.
-    """
-    return memory_usage_bytes / (1024 ** 2)
-    
-    
-def parse_memory_string(memory_string):
-    """
-    Parse a memory string and convert it to bytes.
-
-    Args:
-        memory_string (str): Memory string in Kubernetes format (e.g., "64Mi").
-
-    Returns:
-        int: Memory value in bytes.
-    """
-    if memory_string.endswith("Ki"):
-        return int(memory_string[:-2]) * 1024
-    elif memory_string.endswith("Mi"):
-        return int(memory_string[:-2]) * 1024 ** 2
-    elif memory_string.endswith("Gi"):
-        return int(memory_string[:-2]) * 1024 ** 3
-    elif memory_string.endswith("Ti"):
-        return int(memory_string[:-2]) * 1024 ** 4
-    else:
-        raise ValueError("Invalid memory string format")
-        
-        
 def watch_pods():
     """
     Watch pods in a specified namespace and log their phase transitions to a CSV file.
     """
     try: 
-    
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
-        config_file_path = os.path.join(project_root, "config", "config.yaml")
-        config_data = load_config(config_file_path)
+
+        # Load configuration data from the YAML file
+        config_data = load_config("config.yaml")
+        # Get the namespace from the configuration data
         namespace = config_data['namespace']
+        
+        # Get the results file for pods from the configuration data, default to 'data.csv'
         results_file_pods = config_data.get('results_file_pods', 'data.csv')
-        # Load Kubernetes configuration
+
+        # Load Kubernetes configuration from default location
         config.load_kube_config()
 
         # Create a client to interact with the Kubernetes API
@@ -80,48 +34,42 @@ def watch_pods():
             # Extract pod name and phase from the event
             pod_name = event['object'].metadata.name
             pod_phase = event['object'].status.phase
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Get current timestamp
+            # Get current timestamp with milliseconds
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
             # Check the phase of the pod and take appropriate action
-            if pod_phase == "Running":
+            if pod_phase == "Pending":
+                print(f"Pod {pod_name} is now Pending.")
+
+            elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
+                print(f"Pod {pod_name} is now Running.")
                 write_to_csv(results_file_pods, [timestamp, pod_name, "Running"])
 
             elif pod_phase == "Failed" or pod_phase == "Succeeded":
+                print(f"Pod {pod_name} is now Completed.")
                 # Write timestamp, pod name, and phase to the CSV file
                 write_to_csv(results_file_pods, [timestamp, pod_name, "Terminated"])
 
     except Exception as e:
+        # Handle any exceptions and print error message
         print(f"Error watching pods:", e)
 
-
-def write_to_csv(filename, data):
-    """
-    Write data to a CSV file.
-
-    Args:
-        filename (str): Path to the CSV file.
-        data (list of tuples): Data to be written to the CSV file.
-    """
-    with open(filename, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(data)
 
 def get_storage_and_resource_utilization_for_all_nodes(output_file=None):
     """
     Get storage usage, CPU, and RAM utilization for all nodes in the Kubernetes cluster. Write results in a CSV file format IF file given. Otherwise, it is sent back as data.
     """
     try:
-        # Load configuration from the YAML file
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
-        config_file_path = os.path.join(project_root, "config", "config.yaml")
-        config_data = load_config(config_file_path)
+
+        config_data = load_config("config.yaml")
+        
         namespace = config_data['namespace']
         disk_size_gb = config_data.get('disk_size', 0)  # Disk size in GB
         nodes_number = config_data.get('nodes_number', 1)  # Number of nodes
         memory_per_node_mb = config_data.get('memory', 0)  # Memory per node in MB
         cpus_per_node = config_data.get('cpus', 0)  # CPUs per node
+        
         results_file_nodes = config_data.get('results_file_nodes', 'data.csv') if output_file is None else output_file  # File to load results
 
         # Calculate base storage capacity per node
@@ -210,10 +158,7 @@ def watch_nodes():
     """
     Get nodes data for a specific namespace.Complete data result file every second.
     """
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(script_dir)
-    config_file_path = os.path.join(project_root, "config", "config.yaml")
-    config_data = load_config(config_file_path)
+    config_data = load_config("config.yaml")
     results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
     while True:
         get_storage_and_resource_utilization_for_all_nodes(output_file=results_file_nodes)
