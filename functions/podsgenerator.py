@@ -7,10 +7,11 @@ from kubernetes import client, config, watch
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv     
 import os   
 
+def node_selector(available_nodes):
+	random.choice(available_nodes)
+
 # Function to get the list of available nodes
-def get_available_nodes():
-    config.load_kube_config()
-    api_instance = client.CoreV1Api()
+def get_available_nodes(api_instance):
     nodes = api_instance.list_node().items
     return [node.metadata.name for node in nodes]
 
@@ -44,61 +45,71 @@ def generate_resources(pod_type, pod_config):
         }
     else:  # Best-effort
         return {}
+        
+        
+def get_pod_spec(namespace, pod_name, node_name, resources):
+    """
+    Generate the specification for the pod.
+
+    Args:
+    - namespace (str): The namespace for the pod.
+    - pod_name (str): The name of the pod.
+    - node_name (str): The name of the node where the pod will be scheduled.
+    - resources (dict): The resource limits for the pod.
+
+    Returns:
+    - dict: The pod specification.
+    """
+    return {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+            "name": pod_name,
+            "namespace": namespace
+        },
+        "spec": {
+            "nodeName": node_name,
+            "restartPolicy": "Never",
+            "containers": [
+                {
+                    "name": "example-container",
+                    "image": "python:3.9",
+                    "command": ["python", "-u", "-c",
+                                "import math; primes = [num for num in range(2, 1000000) if all(num % i != 0 for i in range(2, int(math.sqrt(num)) + 1))]"],
+                    "resources": resources
+                }
+            ]
+        }
+    }
 
 # Function to launch a pod on a random node 
-def launch_pod(namespace, node_name, pod_config, pod_counter):
-    config.load_kube_config()
-    api_instance = client.CoreV1Api()
+def launch_pod(namespace, node_name, pod_config, pod_counter,api_instance):
 
-    num_pods = random.randint(1, 3)  # Random number of pods to launch
+    pod_type = random.choice(["guaranteed", "burstable", "besteffort"])
+    resources = generate_resources(pod_type, pod_config)
 
-    for _ in range(num_pods):
-        pod_type = random.choice(["guaranteed", "burstable", "besteffort"])
-        resources = generate_resources(pod_type, pod_config)
+    # Define pod name with type and counter
+    pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
 
-        # Define pod name with type and counter
-        pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
+    # Check if pod name already exists, if yes, generate a new name
+    while True:
+        if api_instance.list_namespaced_pod(namespace=namespace, field_selector=f"metadata.name={pod_name}").items:
+            pod_counter += 1
+            pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
+        else:
+            break
 
-        # Check if pod name already exists, if yes, generate a new name
-        while True:
-            if api_instance.list_namespaced_pod(namespace=namespace, field_selector=f"metadata.name={pod_name}").items:
-                pod_counter += 1
-                pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
-            else:
-                break
+    # Define pod specification
+    pod_manifest = get_pod_spec(namespace, pod_name, node_name, resources)
 
-        # Define pod specification
-        pod_manifest = {
-            "apiVersion": "v1",
-            "kind": "Pod",
-            "metadata": {
-                "name": pod_name,
-                "namespace": namespace
-            },
-            "spec": {
-                "nodeName": node_name,
-                "restartPolicy": "Never",
-                "containers": [
-                    {
-                        "name": "example-container",
-                        "image": "python:3.9",
-                        "command": ["python", "-u", "-c",
-                                    "import math; primes = [num for num in range(2, 100000) if all(num % i != 0 for i in range(2, int(math.sqrt(num)) + 1))]"],
-                        "resources": resources
-                    }
-                ]
-            }
-        }
+    # Create the pod
+    api_instance.create_namespaced_pod(namespace=namespace, body=pod_manifest)
+    print(f"Pod launched on node {node_name} with type: {pod_type}")
 
-        # Create the pod
-        api_instance.create_namespaced_pod(namespace=namespace, body=pod_manifest)
-        print(f"Pod launched on node {node_name} with type: {pod_type}")
-
-        # Increment pod counter for the next pod
-        pod_counter += 1
+    # Increment pod counter for the next pod
+    pod_counter += 1
         
         
-# Main function
 def run_pods():
 
     config_data = load_config("config.yaml")
@@ -109,8 +120,11 @@ def run_pods():
     
     pod_config = get_pod_config(config_data)
 
+    config.load_kube_config()
+    api_instance = client.CoreV1Api()
+
     # Get the list of available nodes
-    available_nodes = get_available_nodes()
+    available_nodes = get_available_nodes(api_instance)
 
     # Get pod config
 
@@ -118,6 +132,8 @@ def run_pods():
 
     # Launch pods periodically
     while True:
-        node_name = random.choice(available_nodes)
-        launch_pod(namespace, node_name, pod_config, pod_counter)
-        time.sleep(random.randint(6, 8))
+        time.sleep(random.randint(3, 6))
+        num_pods = random.randint(2, 5)  # Random number of pods to launch
+        for _ in range(num_pods):
+            node_name = node_selector(available_nodes)
+            launch_pod(namespace, node_name, pod_config, pod_counter, api_instance)

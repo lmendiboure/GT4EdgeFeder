@@ -1,5 +1,5 @@
 import threading
-from functions.functions import get_storage_and_resource_utilization_for_all_nodes,watch_nodes,watch_pods
+from functions.functions import watch_nodes,watch_pods
 import time
 from functions.podsgenerator import run_pods
 
