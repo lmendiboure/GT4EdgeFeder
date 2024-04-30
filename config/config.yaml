@@ -12,10 +12,30 @@ cpus: 2  # Number of CPU cores per node
 results_file_nodes: plots/results/data_nodes.csv
 results_file_pods: plots/results/data_pods.csv
 
-# Configuration for pods
+# Configuration for pods. Selected pods : https://zenodo.org/records/3974220
 
 pods_config:
-  - name: example-pod
-    CPU: [100, 200, 300, 400]  # Set of CPU values in milli CPUs
-    RAM: [16, 20, 24, 30, 32]   # Set of RAM values in Mi
+  - name: aeneas-pod
+    CPU: 200  # Set of CPU values in milli CPUs
+    RAM: 24   # Set of RAM values in Mi
     storage: 5000  # Storage capacity for the nginx pod in MB
+    transmission_uplink: 427347 # bits to transmit over RAN
+    transmission_dowlink: 816
+    instructions: 8807684292 # number of instructions to be done
+    deadline: 55 # Maximum delay for this app
+  - name: julius-pod
+    CPU: 500  
+    RAM: 48  
+    storage: 5000 
+    transmission_uplink: 160097
+    transmission_dowlink: 9032 
+    instructions: 100141000000
+    deadline: 60  
+  - name: mrleo-pod
+    CPU: 400 
+    RAM: 96  
+    storage: 5000 
+    transmission_uplink: 41000
+    transmission_dowlink: 41000
+    instructions: 544271527
+    deadline: 33

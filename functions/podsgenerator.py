@@ -74,8 +74,7 @@ def get_pod_spec(namespace, pod_name, node_name, resources):
                 {
                     "name": "example-container",
                     "image": "python:3.9",
-                    "command": ["python", "-u", "-c",
-                                "import math; primes = [num for num in range(2, 1000000) if all(num % i != 0 for i in range(2, int(math.sqrt(num)) + 1))]"],
+                    "command": ["python", "-u", "-c", "results = [1 + 1 for _ in range("8807684292")]"],
                     "resources": resources
                 }
             ]
