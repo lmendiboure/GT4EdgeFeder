@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     # Clean environment
     	
-    delete_pods()
+    #delete_pods()
     
     # Run a thread measuring every second nodes nodes stats
     thread = threading.Thread(target=watch_nodes)

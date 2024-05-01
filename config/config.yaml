@@ -5,7 +5,7 @@ namespace: expe
 disk_size: 20000  # Disk size in MB => equally shared between nodes
 nodes_number: 2  # Number of nodes in the cluster
 memory: 24000 # RAM per node in MB
-cpus: 2  # Number of CPU cores per node
+cpus: 4  # Number of CPU cores per node
 
 # Configuration for experimentations results
 

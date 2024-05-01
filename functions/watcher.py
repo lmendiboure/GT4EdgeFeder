@@ -59,41 +59,9 @@ def watch_pods():
     except Exception as e:
         # Handle any exceptions and print error message
         print(f"Error watching pods:", e)
-        
-        
-
-def get_cpu_usage_percent():
-    """Get the CPU usage percentage."""
-    return psutil.cpu_percent(interval=1)
-
-def get_ram_usage_percent():
-    """Get the RAM usage percentage."""
-    return psutil.virtual_memory().percent
-
-def get_cluster_nodes_usage():
-    """Get CPU and RAM usage for all nodes in the Kubernetes cluster."""
-    config.load_kube_config()  
-
-    v1 = client.CoreV1Api()
-    nodes = v1.list_node().items
-
-    node_usage = {}
-
-    for node in nodes:
-        node_name = node.metadata.name
-        node_ip = node.status.addresses[0].address
-        node_cpu_usage = get_cpu_usage_percent()
-        node_ram_usage = get_ram_usage_percent()
-        node_usage[node_name] = {
-            'ip': node_ip,
-            'cpu_usage_percent': node_cpu_usage,
-            'ram_usage_percent': node_ram_usage
-        }
-
-    return node_usage
 
 
-def get_ephemeral_storage_usage(config_data):
+def get_cluster_node_usage(config_data):
     """Get the ephemeral storage usage for all nodes in the Kubernetes cluster."""
     try:
         config.load_kube_config()  
@@ -103,6 +71,10 @@ def get_ephemeral_storage_usage(config_data):
         
         nodes_number = config_data['nodes_number']
         
+        available_cpu = config_data['cpus']
+        
+        available_ram = config_data['memory']
+        
         storage_size = disk_size / nodes_number
         
         api_instance = client.CoreV1Api()
@@ -110,10 +82,14 @@ def get_ephemeral_storage_usage(config_data):
         nodes = api_instance.list_node().items
 
         storage_data = {}
+        cpu_data = {}
+        ram_data = {}
 
         for node in nodes:
             node_name = node.metadata.name
             total_storage_used = 0
+            total_cpu_used = 0
+            total_ram_used = 0
 
             pods = api_instance.list_namespaced_pod(namespace=namespace, field_selector=f"spec.nodeName={node_name}").items
 
@@ -123,10 +99,16 @@ def get_ephemeral_storage_usage(config_data):
                         if pod.metadata.name.startswith(pod_config['name']):
                             pod_storage_usage = pod_config['storage']
                             total_storage_used += pod_storage_usage
+                            pod_cpu_usage = pod_config['CPU']
+                            total_cpu_used += pod_cpu_usage/1000
+                            pod_ram_usage = pod_config['RAM']
+                            total_ram_used += pod_ram_usage
 
             storage_data[node_name] = (total_storage_used/storage_size)*100
+            cpu_data[node_name] = (total_cpu_used/available_cpu)*100
+            ram_data[node_name] = (total_storage_used/available_ram)*100
 
-        return storage_data
+        return storage_data, cpu_data, ram_data
 
     except Exception as e:
         print(f"Error retrieving ephemeral storage utilization information:", e)
@@ -141,21 +123,17 @@ def get_nodes_utilization(output_file=None):
         config_data = load_config("config.yaml")   
         
         results_file_nodes = config_data.get('results_file_nodes', 'data.csv') if output_file is None else output_file
-
-	# Compute CPU and RAM usage
-        node_usage = get_cluster_nodes_usage()
         
-        # Compute storage usage
-        storage_data = get_ephemeral_storage_usage(config_data)
-        print(storage_data)
+        # Compute usage
+        storage_data, cpu_data, ram_data = get_cluster_node_usage(config_data)
+        print(storage_data, cpu_data, ram_data)
         timestamp = datetime.now()
 
-        if node_usage:
-            for node_name, node_data in node_usage.items():
-                cpu_utilization_rate = node_data['cpu_usage_percent']
-                ram_utilization_rate = node_data['ram_usage_percent']
-                storage_usage = storage_data.get(node_name, 0)
-                write_to_csv(results_file_nodes, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_usage))
+        for node_name in storage_data.items():
+            cpu_utilization_rate = cpu_data.get(node_name, 0)
+            ram_utilization_rate = ram_data.get(node_name, 0)
+            storage_utilization_rate = storage_data.get(node_name, 0)
+            write_to_csv(results_file_nodes, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_utilization_rate))
 
     except Exception as e:
         print(f"Error retrieving resource utilization and storage information:", e)

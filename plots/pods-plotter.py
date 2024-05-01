@@ -72,7 +72,7 @@ def calculate_time_difference(file_path):
                     if time_difference_pending > 0:  # Check if time difference is positive
                         # Retrieve the node name for the pod
                         node_name = node_names.get(pod, "Unknown")
-                        print(f"Pod {pod}: Time difference (Pending-Terminated) - {time_difference_pending} milliseconds, Node Name - {node_name}")
+                        print(f"Pod {pod}: Time difference (Pending-Terminated) - {time_difference_pending} milliseconds")
                 if pod in running_times:
                     running_time = running_times.pop(pod)
                     time_difference_running = timestamp_ms - running_time

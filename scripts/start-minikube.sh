@@ -13,5 +13,8 @@ minikube start --disk-size="$disk_size" --nodes="$nodes_number" --memory="$memor
 # Create namespace if it doesn't exist
 kubectl get namespace "$namespace" >/dev/null 2>&1 || kubectl create namespace "$namespace"
 
+# Add Metric Server; check if running: kubectl get pods --all-namespaces | grep metrics-server
+minikube addons enable metrics-server
+
 # Apply components.yaml
-kubectl apply -f ../config/components.yaml
+#kubectl apply -f ../config/components.yaml
