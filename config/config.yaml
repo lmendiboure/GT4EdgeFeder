@@ -16,28 +16,28 @@ results_file_pods: plots/results/data_pods.csv
 
 pods_config:
   - name: aeneas-pod
-    CPU: 200  # Set of CPU values in milli CPUs
+    CPU: 100  # Set of CPU values in milli CPUs
     RAM: 6000   # Set of RAM values in Mi
-    storage: 600  # Storage capacity for the nginx pod in MB
+    storage: 60  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN
     transmission_dowlink: 816
-    instructions: 855555555 # Real value : 8807684292 # number of instructions to be done
+    instructions: 355555555 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
-    CPU: 500  
+    CPU: 150  
     RAM: 7200  
-    storage: 800 
+    storage: 80 
     transmission_uplink: 160097
     transmission_dowlink: 9032 
     instructions: 195555555 # Real value : 100141000000
     deadline: 60  
   - name: mrleo-pod
-    CPU: 400 
+    CPU: 200 
     RAM: 7200  
-    storage: 400 
+    storage: 40 
     transmission_uplink: 41000
     transmission_dowlink: 41000
-    instructions: 955555555 # Real value : 544271527
+    instructions: 255555555 # Real value : 544271527
     deadline: 33
     
     

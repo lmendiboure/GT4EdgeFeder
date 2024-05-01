@@ -5,7 +5,9 @@ import time
 from kubernetes import client, config, watch
 from datetime import datetime
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv    
-import psutil    
+import psutil
+import random
+    
 
 def watch_pods():
     """
@@ -61,10 +63,10 @@ def watch_pods():
         print(f"Error watching pods:", e)
 
 
-def get_cluster_node_usage(config_data):
+def get_cluster_node_usage(api_instance, config_data):
     """Get the ephemeral storage usage for all nodes in the Kubernetes cluster."""
     try:
-        config.load_kube_config()  
+
         namespace = config_data['namespace']
         
         disk_size = config_data['disk_size']
@@ -75,16 +77,13 @@ def get_cluster_node_usage(config_data):
         
         available_ram = config_data['memory']
         
-        storage_size = disk_size / nodes_number
-        
-        api_instance = client.CoreV1Api()
-        
-        nodes = api_instance.list_node().items
+        storage_size = disk_size / nodes_number 
 
         storage_data = {}
         cpu_data = {}
         ram_data = {}
 
+        nodes = api_instance.list_node().items
         for node in nodes:
             node_name = node.metadata.name
             total_storage_used = 0
@@ -99,14 +98,26 @@ def get_cluster_node_usage(config_data):
                         if pod.metadata.name.startswith(pod_config['name']):
                             pod_storage_usage = pod_config['storage']
                             total_storage_used += pod_storage_usage
-                            pod_cpu_usage = pod_config['CPU']
-                            total_cpu_used += pod_cpu_usage/1000
-                            pod_ram_usage = pod_config['RAM']
-                            total_ram_used += pod_ram_usage
+                            if "bu" in pod.metadata.name:
+                                pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU'])
+                                total_cpu_used += pod_cpu_usage/1000
+                                pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM'])
+                                total_ram_used += pod_ram_usage/10    
+                            elif "gu" in pod.metadata.name:
+                                pod_cpu_usage = pod_config['CPU']
+                                total_cpu_used += pod_cpu_usage//1000
+                                pod_ram_usage = pod_config['RAM']
+                                total_ram_used += pod_ram_usage/10   
+                            elif "be" in pod.metadata.name:
+                                pod_cpu_usage = random.randint(0, pod_config['CPU'])
+                                total_cpu_used += pod_cpu_usage/1000
+                                pod_ram_usage = random.randint(0, pod_config['RAM'])
+                                total_ram_used += pod_ram_usage/10    
+                            
 
             storage_data[node_name] = (total_storage_used/storage_size)*100
             cpu_data[node_name] = (total_cpu_used/available_cpu)*100
-            ram_data[node_name] = (total_storage_used/available_ram)*100
+            ram_data[node_name] = (total_ram_used/available_ram)*100
 
         return storage_data, cpu_data, ram_data
 
@@ -124,12 +135,19 @@ def get_nodes_utilization(output_file=None):
         
         results_file_nodes = config_data.get('results_file_nodes', 'data.csv') if output_file is None else output_file
         
+        config.load_kube_config()  
+                
+        api_instance = client.CoreV1Api()
+        
+        nodes = api_instance.list_node().items
         # Compute usage
-        storage_data, cpu_data, ram_data = get_cluster_node_usage(config_data)
+        storage_data, cpu_data, ram_data = get_cluster_node_usage(api_instance, config_data)
         print(storage_data, cpu_data, ram_data)
         timestamp = datetime.now()
+       
 
-        for node_name in storage_data.items():
+        for node in nodes:
+            node_name = node.metadata.name
             cpu_utilization_rate = cpu_data.get(node_name, 0)
             ram_utilization_rate = ram_data.get(node_name, 0)
             storage_utilization_rate = storage_data.get(node_name, 0)
