@@ -35,17 +35,21 @@ def watch_pods():
             # Extract pod name and phase from the event
             pod_name = event['object'].metadata.name
             pod_phase = event['object'].status.phase
+            node_name = event['object'].spec.node_name  # Get the node name
+
             # Get current timestamp with milliseconds
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
             # Check the phase of the pod and take appropriate action
             if pod_phase == "Pending":
                 print(f"Pod {pod_name} is now Pending.")
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending"])
+
 
             elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
-                print(f"Pod {pod_name} is now Running.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Running"])
+                print(f"Pod {pod_name} is now Running on Node {node_name}.")
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", node_name])
 
             elif pod_phase == "Failed" or pod_phase == "Succeeded":
                 print(f"Pod {pod_name} is now Completed.")
@@ -88,12 +92,21 @@ def get_cluster_nodes_usage():
 
     return node_usage
 
-def get_ephemeral_storage_usage(namespace, storage_size, pod_name, pod_storage):
+
+def get_ephemeral_storage_usage(config_data):
     """Get the ephemeral storage usage for all nodes in the Kubernetes cluster."""
     try:
         config.load_kube_config()  
-
+        namespace = config_data['namespace']
+        
+        disk_size = config_data['disk_size']
+        
+        nodes_number = config_data['nodes_number']
+        
+        storage_size = disk_size / nodes_number
+        
         api_instance = client.CoreV1Api()
+        
         nodes = api_instance.list_node().items
 
         storage_data = {}
@@ -106,9 +119,12 @@ def get_ephemeral_storage_usage(namespace, storage_size, pod_name, pod_storage):
 
             for pod in pods:
                 if pod.status.phase == "Running":
-                    total_storage_used += pod_storage
+                    for pod_config in config_data.get('pods_config', []):
+                        if pod.metadata.name.startswith(pod_config['name']):
+                            pod_storage_usage = pod_config['storage']
+                            total_storage_used += pod_storage_usage
 
-            storage_data[node_name] = total_storage_used/storage_size
+            storage_data[node_name] = (total_storage_used/storage_size)*100
 
         return storage_data
 
@@ -116,41 +132,13 @@ def get_ephemeral_storage_usage(namespace, storage_size, pod_name, pod_storage):
         print(f"Error retrieving ephemeral storage utilization information:", e)
         return None
 
-def get_pod_storage_usage(api_instance, namespace, pod_name):
-    """Get the storage usage of a specific pod."""
-    try:
-        pod = api_instance.read_namespaced_pod_status(name=pod_name, namespace=namespace)
-        total_storage_used = 0
-
-        for container in pod.spec.containers:
-            for volume_mount in container.volume_mounts:
-                if volume_mount.mount_path == "/var/lib/docker":
-                    total_storage_used += volume_mount.size_limit
-
-        return total_storage_used
-
-    except Exception as e:
-        print(f"Error retrieving storage usage for pod {pod_name}:", e)
-        return 0
 
 def get_nodes_utilization(output_file=None):
     """Get CPU, RAM, and ephemeral storage utilization for all nodes in the Kubernetes cluster."""
     try:
     
     	# Retrieve infos from config file
-        config_data = load_config("config.yaml")
-        
-        namespace = config_data['namespace']
-        
-        disk_size = config_data['disk_size']
-        
-        nodes_number = config_data['nodes_number']
-        
-        base_storage_per_node_gb = disk_size / nodes_number
-       
-        pod_name_prefix = config_data['pods_config'][0]['name'] 
-        
-        pod_storage = config_data['pods_config'][0]['storage']      
+        config_data = load_config("config.yaml")   
         
         results_file_nodes = config_data.get('results_file_nodes', 'data.csv') if output_file is None else output_file
 
@@ -158,8 +146,8 @@ def get_nodes_utilization(output_file=None):
         node_usage = get_cluster_nodes_usage()
         
         # Compute storage usage
-        storage_data = get_ephemeral_storage_usage(namespace, base_storage_per_node_gb, pod_name_prefix, pod_storage)
-
+        storage_data = get_ephemeral_storage_usage(config_data)
+        print(storage_data)
         timestamp = datetime.now()
 
         if node_usage:

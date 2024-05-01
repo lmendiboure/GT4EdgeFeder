@@ -8,7 +8,7 @@ from functions.utils import load_config, convert_memory_usage_to_megabytes, pars
 import os   
 
 def node_selector(available_nodes):
-	random.choice(available_nodes)
+	return random.choice(available_nodes)
 
 # Function to get the list of available nodes
 def get_available_nodes(api_instance):
@@ -17,17 +17,19 @@ def get_available_nodes(api_instance):
 
 # Function to get pod configuration and namespace from loaded config
 def get_pod_config(config_data):
-    pod_config = config_data['pods_config'][0]  # Assume only one pod config is present
+    app_pod = random.randint(0, 2)
+    pod_config = config_data['pods_config'][app_pod]
     return {
         "name": pod_config["name"],  # Name of the pod
-        "CPU": pod_config["CPU"],    # Set of CPU values in milli CPUs
-        "RAM": pod_config["RAM"],    # Set of RAM values in Mi
+        "CPU": pod_config["CPU"],    # CPU value in milli CPUs
+        "RAM": pod_config["RAM"],    # RAM value in Mi
+        "instructions":pod_config["instructions"],
         "namespace": config_data["namespace"]  # Namespace
     }
 # Function to generate resource limits based on pod type
 def generate_resources(pod_type, pod_config):
-    cpu = random.choice(pod_config["CPU"])
-    ram = random.choice(pod_config["RAM"])
+    cpu = pod_config["CPU"]
+    ram = pod_config["RAM"]
 
     if pod_type == "guaranteed":
         return {
@@ -47,7 +49,7 @@ def generate_resources(pod_type, pod_config):
         return {}
         
         
-def get_pod_spec(namespace, pod_name, node_name, resources):
+def get_pod_spec(namespace, pod_name, node_name, resources,instructions):
     """
     Generate the specification for the pod.
 
@@ -74,7 +76,7 @@ def get_pod_spec(namespace, pod_name, node_name, resources):
                 {
                     "name": "example-container",
                     "image": "python:3.9",
-                    "command": ["python", "-u", "-c", "results = [1 + 1 for _ in range("8807684292")]"],
+                   "command": ["python", "-u", "-c", f"results = [1 + 1 for _ in range({instructions})]"],
                     "resources": resources
                 }
             ]
@@ -86,27 +88,15 @@ def launch_pod(namespace, node_name, pod_config, pod_counter,api_instance):
 
     pod_type = random.choice(["guaranteed", "burstable", "besteffort"])
     resources = generate_resources(pod_type, pod_config)
-
     # Define pod name with type and counter
     pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
 
-    # Check if pod name already exists, if yes, generate a new name
-    while True:
-        if api_instance.list_namespaced_pod(namespace=namespace, field_selector=f"metadata.name={pod_name}").items:
-            pod_counter += 1
-            pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
-        else:
-            break
-
     # Define pod specification
-    pod_manifest = get_pod_spec(namespace, pod_name, node_name, resources)
+    pod_manifest = get_pod_spec(namespace, pod_name, node_name, resources, pod_config["instructions"])
 
     # Create the pod
     api_instance.create_namespaced_pod(namespace=namespace, body=pod_manifest)
     print(f"Pod launched on node {node_name} with type: {pod_type}")
-
-    # Increment pod counter for the next pod
-    pod_counter += 1
         
         
 def run_pods():
@@ -116,8 +106,6 @@ def run_pods():
     namespace = config_data["namespace"]
     
     pod_counter = 1  # Initialize pod counter
-    
-    pod_config = get_pod_config(config_data)
 
     config.load_kube_config()
     api_instance = client.CoreV1Api()
@@ -125,14 +113,14 @@ def run_pods():
     # Get the list of available nodes
     available_nodes = get_available_nodes(api_instance)
 
-    # Get pod config
-
-    pod_config = get_pod_config(config_data)
-
     # Launch pods periodically
     while True:
-        time.sleep(random.randint(3, 6))
-        num_pods = random.randint(2, 5)  # Random number of pods to launch
+        time.sleep(random.randint(1, 3))
+        num_pods = random.randint(3, 6)  # Random number of pods to launch
         for _ in range(num_pods):
             node_name = node_selector(available_nodes)
+            # Get pod config
+            pod_config = get_pod_config(config_data)
             launch_pod(namespace, node_name, pod_config, pod_counter, api_instance)
+            # Increment pod counter for the next pod
+            pod_counter += 1

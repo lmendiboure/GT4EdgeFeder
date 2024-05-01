@@ -69,3 +69,32 @@ def parse_memory_string(memory_string):
     else:
         raise ValueError("Invalid memory string format")
         
+        
+def delete_pods():
+    """
+    Delete all pods in the specified namespace.
+
+    Args:
+        namespace (str): Namespace to delete pods from.
+
+    Returns:
+        None
+    """
+    
+    # Load configuration data from the YAML file
+    config_data = load_config("config.yaml")
+    # Get the namespace from the configuration data
+    namespace = config_data['namespace']
+    # Load Kubernetes configuration from default location
+    config.load_kube_config()
+
+    # Create a client to interact with the Kubernetes API
+    api_instance = client.CoreV1Api()
+
+    # List all pods in the specified namespace
+    pods = api_instance.list_namespaced_pod(namespace=namespace).items
+
+    # Iterate over each pod and delete it
+    for pod in pods:
+        # Delete the pod
+        api_instance.delete_namespaced_pod(name=pod.metadata.name, namespace=namespace, grace_period_seconds=0)        

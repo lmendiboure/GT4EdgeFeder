@@ -3,8 +3,8 @@
 # Configuration for Kubernetes
 namespace: expe
 disk_size: 20000  # Disk size in MB => equally shared between nodes
-nodes_number: 3  # Number of nodes in the cluster
-memory: 32768 # RAM per node in MB
+nodes_number: 2  # Number of nodes in the cluster
+memory: 24000 # RAM per node in MB
 cpus: 2  # Number of CPU cores per node
 
 # Configuration for experimentations results
@@ -17,25 +17,27 @@ results_file_pods: plots/results/data_pods.csv
 pods_config:
   - name: aeneas-pod
     CPU: 200  # Set of CPU values in milli CPUs
-    RAM: 24   # Set of RAM values in Mi
-    storage: 5000  # Storage capacity for the nginx pod in MB
+    RAM: 6000   # Set of RAM values in Mi
+    storage: 600  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN
     transmission_dowlink: 816
-    instructions: 8807684292 # number of instructions to be done
+    instructions: 855555555 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
     CPU: 500  
-    RAM: 48  
-    storage: 5000 
+    RAM: 7200  
+    storage: 800 
     transmission_uplink: 160097
     transmission_dowlink: 9032 
-    instructions: 100141000000
+    instructions: 195555555 # Real value : 100141000000
     deadline: 60  
   - name: mrleo-pod
     CPU: 400 
-    RAM: 96  
-    storage: 5000 
+    RAM: 7200  
+    storage: 400 
     transmission_uplink: 41000
     transmission_dowlink: 41000
-    instructions: 544271527
+    instructions: 955555555 # Real value : 544271527
     deadline: 33
+    
+    
