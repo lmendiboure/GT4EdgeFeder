@@ -1,0 +1,29 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: high-priority-pdb
+spec:
+  selector:
+    matchLabels:
+      priority-class: high-priority
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: medium-priority-pdb
+spec:
+  selector:
+    matchLabels:
+      priority-class: medium-priority
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: low-priority-pdb
+spec:
+  selector:
+    matchLabels:
+      priority-class: low-priority
+  minAvailable: 1

@@ -49,7 +49,7 @@ def generate_resources(pod_type, pod_config):
         return {}
         
         
-def get_pod_spec(namespace, pod_name, node_name, resources,instructions):
+def get_pod_spec(namespace, pod_name, node_name, resources,instructions, priority_class=None):
     """
     Generate the specification for the pod.
 
@@ -58,11 +58,12 @@ def get_pod_spec(namespace, pod_name, node_name, resources,instructions):
     - pod_name (str): The name of the pod.
     - node_name (str): The name of the node where the pod will be scheduled.
     - resources (dict): The resource limits for the pod.
+    - priority_class (str): The name of the priority class to use.
 
     Returns:
     - dict: The pod specification.
     """
-    return {
+    spec = {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
@@ -82,6 +83,10 @@ def get_pod_spec(namespace, pod_name, node_name, resources,instructions):
             ]
         }
     }
+    if priority_class:
+        spec['spec']['priorityClassName'] = priority_class
+    
+    return spec    
 
 # Function to launch a pod on a random node 
 def launch_pod(namespace, node_name, pod_config, pod_counter,api_instance):
@@ -91,8 +96,18 @@ def launch_pod(namespace, node_name, pod_config, pod_counter,api_instance):
     # Define pod name with type and counter
     pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
 
+    # Define pod priority
+    
+    priority_class=""        
+    if pod_type == "guaranteed":
+        priority_class = "high-priority"
+    elif pod_type == "burstable":
+        priority_class = "medium-priority"
+    else:
+        priority_class = "low-priority"
+    
     # Define pod specification
-    pod_manifest = get_pod_spec(namespace, pod_name, node_name, resources, pod_config["instructions"])
+    pod_manifest = get_pod_spec(namespace, pod_name, node_name, resources, pod_config["instructions"],priority_class)
 
     # Create the pod
     api_instance.create_namespaced_pod(namespace=namespace, body=pod_manifest)
