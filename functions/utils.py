@@ -22,6 +22,27 @@ def load_config(filename):
         config_data = yaml.safe_load(file)
     return config_data
     
+def load_dataset(filename):
+    """
+    Load dataset for ran.
+
+    Args:
+        filename (str): Path to the RAN dataset file.
+
+    Returns:
+        dict: ran dataset.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    file_path = os.path.join(project_root, "data", filename)
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        
+    # Exclude first line
+    if lines and len(lines) > 1:
+        lines = lines[1:]    
+    return lines
+
 def convert_memory_usage_to_megabytes(memory_usage_bytes):
     """
     Convert memory usage from bytes to megabytes.

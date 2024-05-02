@@ -38,6 +38,7 @@ def watch_pods():
             pod_name = event['object'].metadata.name
             pod_phase = event['object'].status.phase
             node_name = event['object'].spec.node_name  # Get the node name
+            transmission_delay = event['object'].metadata.annotations['transmission_delay']
 
             # Get current timestamp with milliseconds
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -50,8 +51,8 @@ def watch_pods():
 
             elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
-                print(f"Pod {pod_name} is now Running on Node {node_name}.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", node_name])
+                print(f"Pod {pod_name} is now Running on Node {node_name}. Transmission delay is equal to {transmission_delay}")
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", node_name, transmission_delay])
 
             elif pod_phase == "Failed" or pod_phase == "Succeeded":
                 print(f"Pod {pod_name} is now Completed.")

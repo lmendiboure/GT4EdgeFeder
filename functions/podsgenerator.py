@@ -2,11 +2,13 @@ import random
 import threading
 import time
 import csv
+import math
 from datetime import datetime
 from kubernetes import client, config, watch
-from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv     
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset     
 import os   
 
+# Random node selection => Simplest way to balance the load between nodes
 def node_selector(available_nodes):
 	return random.choice(available_nodes)
 
@@ -14,6 +16,27 @@ def node_selector(available_nodes):
 def get_available_nodes(api_instance):
     nodes = api_instance.list_node().items
     return [node.metadata.name for node in nodes]
+    
+# Function to determine the latency associated with data transmission for a given pod.    
+def get_ran_infos_for_pods(config_data,pod_config):
+    lines=load_dataset(config_data['dataset'])
+    random_line = random.choice(lines)
+    data = random_line.strip().split(',')
+    traffic_load = int(data[11])
+    latency = int(data[12])
+    return math.ceil((pod_config["transmission_uplink"]+pod_config["transmission_downlink"])/(traffic_load*1000)+latency)
+    
+    
+# Function to determine the priority class of a pod. Priority class is directly linked to the type of pod.    
+def get_pod_priority_class(pod_type):
+    priority_class=None        
+    if pod_type == "guaranteed":
+        priority_class = "high-priority"
+    elif pod_type == "burstable":
+        priority_class = "medium-priority"
+    else:
+        priority_class = "low-priority"
+    return priority_class
 
 # Function to get pod configuration and namespace from loaded config
 def get_pod_config(config_data):
@@ -24,7 +47,9 @@ def get_pod_config(config_data):
         "CPU": pod_config["CPU"],    # CPU value in milli CPUs
         "RAM": pod_config["RAM"],    # RAM value in Mi
         "instructions":pod_config["instructions"],
-        "namespace": config_data["namespace"]  # Namespace
+        "namespace": config_data["namespace"],  # Namespace
+        "transmission_uplink": pod_config["transmission_uplink"], # Bits to transmit in Uplink
+        "transmission_downlink": pod_config["transmission_downlink"] # Bits to transmit in Downlink
     }
 # Function to generate resource limits based on pod type
 def generate_resources(pod_type, pod_config):
@@ -49,7 +74,7 @@ def generate_resources(pod_type, pod_config):
         return {}
         
         
-def get_pod_spec(namespace, pod_name, node_name, resources,instructions, priority_class=None):
+def get_pod_spec(config_data, pod_name, node_name, pod_type, pod_config):
     """
     Generate the specification for the pod.
 
@@ -63,12 +88,20 @@ def get_pod_spec(namespace, pod_name, node_name, resources,instructions, priorit
     Returns:
     - dict: The pod specification.
     """
+    instructions = pod_config["instructions"]
+    resources = generate_resources(pod_type, pod_config)
+    delay = str(get_ran_infos_for_pods(config_data, pod_config))
+    namespace = config_data["namespace"]
+    priority_class = get_pod_priority_class(pod_type)
     spec = {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
             "name": pod_name,
-            "namespace": namespace
+            "namespace": namespace,
+            "annotations": {
+                "transmission_delay": delay
+            }
         },
         "spec": {
             "nodeName": node_name,
@@ -89,25 +122,16 @@ def get_pod_spec(namespace, pod_name, node_name, resources,instructions, priorit
     return spec    
 
 # Function to launch a pod on a random node 
-def launch_pod(namespace, node_name, pod_config, pod_counter,api_instance):
-
+def launch_pod(config_data, node_name, pod_config, pod_counter,api_instance):
+    
+    namespace = config_data["namespace"]
     pod_type = random.choice(["guaranteed", "burstable", "besteffort"])
-    resources = generate_resources(pod_type, pod_config)
+    
     # Define pod name with type and counter
     pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}"
-
-    # Define pod priority
-    
-    priority_class=""        
-    if pod_type == "guaranteed":
-        priority_class = "high-priority"
-    elif pod_type == "burstable":
-        priority_class = "medium-priority"
-    else:
-        priority_class = "low-priority"
     
     # Define pod specification
-    pod_manifest = get_pod_spec(namespace, pod_name, node_name, resources, pod_config["instructions"],priority_class)
+    pod_manifest = get_pod_spec(config_data, pod_name, node_name, pod_type, pod_config)
 
     # Create the pod
     api_instance.create_namespaced_pod(namespace=namespace, body=pod_manifest)
@@ -117,8 +141,6 @@ def launch_pod(namespace, node_name, pod_config, pod_counter,api_instance):
 def run_pods():
 
     config_data = load_config("config.yaml")
-    
-    namespace = config_data["namespace"]
     
     pod_counter = 1  # Initialize pod counter
 
@@ -136,6 +158,7 @@ def run_pods():
             node_name = node_selector(available_nodes)
             # Get pod config
             pod_config = get_pod_config(config_data)
-            launch_pod(namespace, node_name, pod_config, pod_counter, api_instance)
+            get_ran_infos_for_pods(config_data,pod_config)
+            launch_pod(config_data, node_name, pod_config, pod_counter, api_instance)
             # Increment pod counter for the next pod
             pod_counter += 1

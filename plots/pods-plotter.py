@@ -40,14 +40,14 @@ def calculate_time_difference(file_path):
         pending_times = {}  # Store pending times for each pod
         running_times = {}  # Store running times for each pod
         node_names = {}  # Store node names for each pod
-        
+        transmission_delays = {} # Store transmission delays for each pod
         # Iterate over each line in the file
         for line in file:
             # Split the line into timestamp, pod, event, and optionally node name
             parts = line.strip().split(',')
             timestamp_str, pod, event = parts[:3]
-            node_name = parts[3] if len(parts) == 4 else None
-            
+            node_name = parts[3] if len(parts) >= 4 else None
+            transmission_delay = parts[4] if len(parts) > 4 else None
             # Convert the timestamp string to total milliseconds
             timestamp_ms = convert_to_milliseconds(timestamp_str)
             
@@ -64,6 +64,8 @@ def calculate_time_difference(file_path):
                     running_times[pod] = timestamp_ms
                 if node_name:
                     node_names[pod] = node_name
+                if transmission_delay:
+                    transmission_delays[pod] = transmission_delay
             elif event == "Terminated":
                 # Calculate the time differences if both pending and running times exist for the pod
                 if pod in pending_times:
@@ -79,7 +81,8 @@ def calculate_time_difference(file_path):
                     if time_difference_running > 0:  # Check if time difference is positive
                         # Retrieve the node name for the pod
                         node_name = node_names.get(pod, "Unknown")
-                        print(f"Pod {pod}: Time difference (Running-Terminated) - {time_difference_running} milliseconds, Node Name - {node_name}")
+                        transmission_delay = transmission_delays.get(pod, "Unknowk")
+                        print(f"Pod {pod}: Time difference (Running-Terminated) - {time_difference_running} milliseconds, Node Name - {node_name}, Transmission Delay - {transmission_delay}")
             else:
                 # Remove the pod from pending and running times if it's not in "Pending" or "Running" state
                 pending_times.pop(pod, None)
