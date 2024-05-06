@@ -57,3 +57,20 @@ plt.grid(True)
 plt.savefig('results/storage_usage.png')  # Enregistrer le plot dans le dossier "results"
 plt.close()
 
+# Calculer la somme normalisée pour chaque nœud
+data['Total'] = (data['CPU'] + data['RAM'] + data['Storage']) / 3
+
+# Plot pourcentage d'utilisation total
+plt.figure(figsize=(10, 6))
+for node, group in data.groupby('Node'):
+    plt.plot(group['TimeElapsed'], group['Total'], label=node)
+
+plt.xlabel('Temps (s)')
+plt.ylabel('Utilisation totale (%)')
+plt.title('Évolution de l\'utilisation totale')
+plt.legend()
+plt.grid(True)
+plt.savefig('results/total_usage.png')  # Enregistrer le plot dans le dossier "results"
+plt.close()
+
+

@@ -110,11 +110,12 @@ def calculate_time_difference(file_path):
                 if count_pending[category][pod_type] > 0:
                     avg_pending_time = total_pending_times[category][pod_type] / count_pending[category][pod_type]
                     print(f"Category {category}, Type {pod_type}: Average Time difference (Pending-Terminated) - {avg_pending_time} milliseconds")
-        for category in total_running_times:
-            for pod_type in total_running_times[category]:
-                if count_running[category][pod_type] > 0:
-                    avg_running_time = total_running_times[category][pod_type] / count_running[category][pod_type]
-                    print(f"Category {category}, Type {pod_type}: Average Time difference (Running-Terminated) - {avg_running_time} milliseconds")
+        # Probably not necessary. Pending-Terminated seems to better represent the time spent by a service in the system.
+        #for category in total_running_times:
+        #    for pod_type in total_running_times[category]:
+        #        if count_running[category][pod_type] > 0:
+        #            avg_running_time = total_running_times[category][pod_type] / count_running[category][pod_type]
+        #            print(f"Category {category}, Type {pod_type}: Average Time difference (Running-Terminated) - {avg_running_time} milliseconds")
 
 
 # Example usage

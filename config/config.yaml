@@ -44,9 +44,9 @@ pods_config:
    
 # Configuration for nodes. Percentage of resources each node corresponds to.
 nodes_config:
-  - CPU_percentage: 0.5
+  - CPU_percentage: 0.65
     RAM_percentage: 0.6
     storage_percentage: 0.4
-  - CPU_percentage: 0.5
+  - CPU_percentage: 0.35
     RAM_percentage: 0.4
     storage_percentage: 0.6 
