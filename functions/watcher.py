@@ -146,13 +146,16 @@ def get_nodes_utilization(output_file=None):
         print(storage_data, cpu_data, ram_data)
         timestamp = datetime.now()
        
-
-        for node in nodes:
-            node_name = node.metadata.name
-            cpu_utilization_rate = cpu_data.get(node_name, 0)
-            ram_utilization_rate = ram_data.get(node_name, 0)
-            storage_utilization_rate = storage_data.get(node_name, 0)
-            write_to_csv(results_file_nodes, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_utilization_rate))
+        if output_file is None:
+            return storage_data, cpu_data, ram_data
+        
+        else: 
+            for node in nodes:
+                node_name = node.metadata.name
+                cpu_utilization_rate = cpu_data.get(node_name, 0)
+                ram_utilization_rate = ram_data.get(node_name, 0)
+                storage_utilization_rate = storage_data.get(node_name, 0)
+                write_to_csv(results_file_nodes, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_utilization_rate))
 
     except Exception as e:
         print(f"Error retrieving resource utilization and storage information:", e)

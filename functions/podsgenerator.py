@@ -7,11 +7,7 @@ from datetime import datetime
 from kubernetes import client, config, watch
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset     
 import os   
-
-# Random node selection => Simplest way to balance the load between nodes
-def node_selector(available_nodes):
-	return random.choice(available_nodes)
-
+	
 # Function to get the list of available nodes
 def get_available_nodes(api_instance):
     nodes = api_instance.list_node().items
@@ -138,7 +134,7 @@ def launch_pod(config_data, node_name, pod_config, pod_counter,api_instance):
     print(f"Pod launched on node {node_name} with type: {pod_type}")
         
         
-def run_pods():
+def run_pods(node_selection_func):
 
     config_data = load_config("config.yaml")
     
@@ -155,7 +151,7 @@ def run_pods():
         time.sleep(random.randint(1, 3))
         num_pods = random.randint(3, 6)  # Random number of pods to launch
         for _ in range(num_pods):
-            node_name = node_selector(available_nodes)
+            node_name = node_selection_func(available_nodes)
             # Get pod config
             pod_config = get_pod_config(config_data)
             get_ran_infos_for_pods(config_data,pod_config)
