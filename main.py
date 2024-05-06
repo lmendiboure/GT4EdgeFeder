@@ -19,5 +19,5 @@ if __name__ == '__main__':
     thread = threading.Thread(target=watch_pods)
     thread.start()
     
-    run_pods(multi_parameter_gt_node_selector)
+    run_pods(random_node_selector)
     

@@ -74,19 +74,25 @@ def get_cluster_node_usage(api_instance, config_data):
         
         nodes_number = config_data['nodes_number']
         
-        available_cpu = config_data['cpus']
+        available_cpu = config_data['cpus']*nodes_number
         
-        available_ram = config_data['memory']
+        available_ram = config_data['memory']*nodes_number
         
-        storage_size = disk_size / nodes_number 
+        storage_size = disk_size 
 
         storage_data = {}
         cpu_data = {}
         ram_data = {}
 
         nodes = api_instance.list_node().items
-        for node in nodes:
+        for index, node in enumerate(nodes):
+            # Get Node Info
             node_name = node.metadata.name
+            node_cpu = available_cpu*config_data['nodes_config'][index]['CPU_percentage']
+            node_ram=available_ram*config_data['nodes_config'][index]['RAM_percentage']
+            node_storage= storage_size*config_data['nodes_config'][index]['storage_percentage']
+
+            # Store load values
             total_storage_used = 0
             total_cpu_used = 0
             total_ram_used = 0
@@ -116,9 +122,9 @@ def get_cluster_node_usage(api_instance, config_data):
                                 total_ram_used += pod_ram_usage/10    
                             
 
-            storage_data[node_name] = (total_storage_used/storage_size)*100
-            cpu_data[node_name] = (total_cpu_used/available_cpu)*100
-            ram_data[node_name] = (total_ram_used/available_ram)*100
+            storage_data[node_name] = (total_storage_used/node_storage)*100
+            cpu_data[node_name] = (total_cpu_used/node_cpu)*100
+            ram_data[node_name] = (total_ram_used/node_ram)*100
 
         return storage_data, cpu_data, ram_data
 
@@ -143,7 +149,7 @@ def get_nodes_utilization(output_file=None):
         nodes = api_instance.list_node().items
         # Compute usage
         storage_data, cpu_data, ram_data = get_cluster_node_usage(api_instance, config_data)
-        print(storage_data, cpu_data, ram_data)
+        print(f"Storage:{storage_data}, CPU:{cpu_data}, RAM:{ram_data}")
         timestamp = datetime.now()
        
         if output_file is None:
