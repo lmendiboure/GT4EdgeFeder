@@ -1,4 +1,5 @@
 from datetime import datetime
+from collections import defaultdict
 
 def convert_to_milliseconds(timestamp_str):
     """
@@ -27,6 +28,7 @@ def calculate_time_difference(file_path):
     Calculate two time differences:
     1) Between the first "Pending" and "Terminated" events for each pod.
     2) Between the first "Running" and "Terminated" events for each pod.
+    Calculate the average duration for each category and type of pods after processing all pods.
 
     Args:
         file_path (str): Path to the CSV file containing pod events.
@@ -41,6 +43,11 @@ def calculate_time_difference(file_path):
         running_times = {}  # Store running times for each pod
         node_names = {}  # Store node names for each pod
         transmission_delays = {} # Store transmission delays for each pod
+        # Initialize dictionaries to store total times for each category and type
+        total_pending_times = defaultdict(lambda: defaultdict(int))
+        total_running_times = defaultdict(lambda: defaultdict(int))
+        count_pending = defaultdict(lambda: defaultdict(int))
+        count_running = defaultdict(lambda: defaultdict(int))
         # Iterate over each line in the file
         for line in file:
             # Split the line into timestamp, pod, event, and optionally node name
@@ -75,19 +82,40 @@ def calculate_time_difference(file_path):
                         # Retrieve the node name for the pod
                         node_name = node_names.get(pod, "Unknown")
                         print(f"Pod {pod}: Time difference (Pending-Terminated) - {time_difference_pending} milliseconds")
+                        category = pod.split('-pod-')[0]
+                        pod_type = pod.split('-pod-')[1].split('-')[0]
+                        total_pending_times[category][pod_type] += time_difference_pending
+                        count_pending[category][pod_type] += 1
                 if pod in running_times:
                     running_time = running_times.pop(pod)
                     time_difference_running = timestamp_ms - running_time
                     if time_difference_running > 0:  # Check if time difference is positive
                         # Retrieve the node name for the pod
                         node_name = node_names.get(pod, "Unknown")
-                        transmission_delay = transmission_delays.get(pod, "Unknowk")
+                        transmission_delay = transmission_delays.get(pod, "Unknown")
                         print(f"Pod {pod}: Time difference (Running-Terminated) - {time_difference_running} milliseconds, Node Name - {node_name}, Transmission Delay - {transmission_delay}")
+                        category = pod.split('-pod-')[0]
+                        pod_type = pod.split('-pod-')[1].split('-')[0]
+                        total_running_times[category][pod_type] += time_difference_running
+                        count_running[category][pod_type] += 1
             else:
                 # Remove the pod from pending and running times if it's not in "Pending" or "Running" state
                 pending_times.pop(pod, None)
                 running_times.pop(pod, None)
                 node_names.pop(pod, None)
+
+        # Calculate and print average times after processing all lines
+        for category in total_pending_times:
+            for pod_type in total_pending_times[category]:
+                if count_pending[category][pod_type] > 0:
+                    avg_pending_time = total_pending_times[category][pod_type] / count_pending[category][pod_type]
+                    print(f"Category {category}, Type {pod_type}: Average Time difference (Pending-Terminated) - {avg_pending_time} milliseconds")
+        for category in total_running_times:
+            for pod_type in total_running_times[category]:
+                if count_running[category][pod_type] > 0:
+                    avg_running_time = total_running_times[category][pod_type] / count_running[category][pod_type]
+                    print(f"Category {category}, Type {pod_type}: Average Time difference (Running-Terminated) - {avg_running_time} milliseconds")
+
 
 # Example usage
 calculate_time_difference("./results/data_pods.csv")
