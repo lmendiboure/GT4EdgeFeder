@@ -23,7 +23,7 @@ def get_ran_infos_for_pods(config_data,pod_config):
     return math.ceil((pod_config["transmission_uplink"]+pod_config["transmission_downlink"])/(traffic_load*1000)+latency)
     
     
-# Function to determine the priority class of a pod. Priority class is directly linked to the type of pod.    
+# Function to determine the priority class of a pod. Priority class is directly linked to the type of pod. Not useful in GT paper.    
 def get_pod_priority_class(pod_type):
     priority_class=None        
     if pod_type == "guaranteed":
@@ -88,7 +88,8 @@ def get_pod_spec(config_data, pod_name, node_name, pod_type, pod_config):
     resources = generate_resources(pod_type, pod_config)
     delay = str(get_ran_infos_for_pods(config_data, pod_config))
     namespace = config_data["namespace"]
-    priority_class = get_pod_priority_class(pod_type)
+    # Priority class could be useful is pods should be prioritized at execution (ie multiple queues), line below enables to retrieve information regarding priority class
+    # priority_class = get_pod_priority_class(pod_type) 
     spec = {
         "apiVersion": "v1",
         "kind": "Pod",
@@ -112,8 +113,9 @@ def get_pod_spec(config_data, pod_name, node_name, pod_type, pod_config):
             ]
         }
     }
-    if priority_class:
-        spec['spec']['priorityClassName'] = priority_class
+    # Add priority class to pod spec
+    #if priority_class:
+    #    spec['spec']['priorityClassName'] = priority_class
     
     return spec    
 

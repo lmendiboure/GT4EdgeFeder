@@ -17,24 +17,24 @@ dataset: ran_dataset.csv
 
 pods_config:
   - name: aeneas-pod
-    CPU: 180  # Set of CPU values in milli CPUs
-    RAM: 6000   # Set of RAM values in Mi
+    CPU: 70  # Set of CPU values in milli CPUs
+    RAM: 2000   # Set of RAM values in Mi
     storage: 220  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN
     transmission_downlink: 816
     instructions: 355555555 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
-    CPU: 150  
-    RAM: 7200  
+    CPU: 80  
+    RAM: 3000  
     storage: 250 
     transmission_uplink: 160097
     transmission_downlink: 9032 
     instructions: 195555555 # Real value : 100141000000
     deadline: 60  
   - name: mrleo-pod
-    CPU: 200 
-    RAM: 7200  
+    CPU: 100 
+    RAM: 3200  
     storage: 300 
     transmission_uplink: 41000
     transmission_downlink: 41000

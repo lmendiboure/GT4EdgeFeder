@@ -16,11 +16,14 @@ kubectl get namespace "$namespace" >/dev/null 2>&1 || kubectl create namespace "
 # Add Metric Server; check if running: kubectl get pods --all-namespaces | grep metrics-server
 minikube addons enable metrics-server
 
-# Apply priority Class management => Prioritize Guaranteeed & Burstable VS Best-effort
-kubectl apply -f ../config/priority_classes.yaml
 
-# Apply premption management : high priority pods could interrupt the operation of low priority pods
-kubectl apply -f ../config/pod_disruption_budgets.yaml
+# Some other potential uses
+
+# Apply priority Class management => Prioritize Guaranteeed & Burstable VS Best-effort : Could be useful if multiple queues were used (ie potential use)
+#kubectl apply -f ../config/priority_classes.yaml
+
+# Apply disruption management : could be useful if multiple instances of a same service were running
+#kubectl apply -f ../config/pod_disruption_budgets.yaml
 
 # Apply components.yaml -> Alternative solution to Metric Server
 #kubectl apply -f ../config/components.yaml

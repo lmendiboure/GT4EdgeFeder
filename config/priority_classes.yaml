@@ -4,6 +4,7 @@ metadata:
   name: high-priority
 value: 1000000
 globalDefault: false
+preemptionPolicy: Never
 description: "High priority class for guaranteed pods"
 ---
 apiVersion: scheduling.k8s.io/v1
@@ -12,6 +13,7 @@ metadata:
   name: medium-priority
 value: 500000
 globalDefault: false
+preemptionPolicy: Never # This line should be removed if premption should be part of experimentation (ie pods with higher priority should be able to stop pods with lower priority
 description: "Medium priority class for burstable pods"
 ---
 apiVersion: scheduling.k8s.io/v1
@@ -20,4 +22,5 @@ metadata:
   name: low-priority
 value: 10000
 globalDefault: false
+preemptionPolicy: Never
 description: "Low priority class for best-effort pods"
