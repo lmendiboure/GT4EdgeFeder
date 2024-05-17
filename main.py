@@ -2,7 +2,7 @@ import threading
 from functions.watcher import watch_nodes,watch_pods, stop_event
 import time
 from functions.pods_manager import run_pods
-from functions.utils import delete_pods
+from functions.utils import delete_pods, clean_experiment_files
 from functions.nodes_selector import multi_parameter_gt_node_selector, cpu_gt_node_selector, random_node_selector
 import sys
 
@@ -10,8 +10,15 @@ if __name__ == '__main__':
 
     # Clean environment
     print("******Cleaning previous experiments******\n")	
+    
+    print("-> Deleting pods remaining from previous experiment (if any)\n")	
     delete_pods()
     print("Done.\n")
+    print("-> Empty results files remaining from previous experiment (if any)\n")	
+    clean_experiment_files()
+    print("Done.\n")
+    
+    # Running new experiment
     print("******Starting new experiment******\n")
     
     # Run a thread measuring every second nodes nodes stats
@@ -30,5 +37,6 @@ if __name__ == '__main__':
     while(1):
     	time.sleep(1)
     	if stop_event.is_set():
+        	print("******Ending experiment******\n")
         	print("******All pods have been processed. Experiment is finished. Data can be found within the results folder.******\n")
         	sys.exit() 

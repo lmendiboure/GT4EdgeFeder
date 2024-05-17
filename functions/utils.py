@@ -80,8 +80,7 @@ def write_to_csv(filename, data):
     """
     with open(filename, 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(data)
-        
+        writer.writerow(data)        
 
 def clean_csv(filename):
     """
@@ -96,6 +95,25 @@ def clean_csv(filename):
         with open(filename, 'w', newline='') as file:
             pass  # Just close it
     
+def clean_experiment_files():
+    """
+    Clean all experiment files (pods + nodes).
+
+    Returns:
+        None
+    """
+    
+    # Load configuration data from the YAML file
+    config_data = load_config("config.yaml")
+    
+    # Get experiment files from the configuration data
+    
+    results_file_pods = config_data.get('results_file_pods', 'data.csv')
+    results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
+    
+    # Empty Files  
+    clean_csv(results_file_pods)
+    clean_csv(results_file_nodes)
 
 def node_name_finder(node_number):
     """

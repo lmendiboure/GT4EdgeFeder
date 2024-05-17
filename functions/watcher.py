@@ -2,7 +2,7 @@ import time
 import sys
 from kubernetes import client, config, watch
 from datetime import datetime
-from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, clean_csv, compute_pods_number    
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, compute_pods_number    
 import random
 import threading
 
@@ -26,9 +26,6 @@ def watch_pods():
         
         # Get the results file for pods from the configuration data, default to 'data.csv'
         results_file_pods = config_data.get('results_file_pods', 'data.csv')
-        
-        # Empty File  
-        clean_csv(results_file_pods)
          	
         # Load Kubernetes configuration from default location
         config.load_kube_config()
@@ -151,16 +148,9 @@ def get_cluster_node_usage(api_instance, config_data):
         return None
 
 
-def get_nodes_utilization(output_file=None):
+def get_nodes_utilization(config_data,output_file=None):
     """Get CPU, RAM, and ephemeral storage utilization for all nodes in the Kubernetes cluster."""
     try:
-    
-    	# Retrieve infos from config file
-        config_data = load_config("config.yaml")   
-        
-        results_file_nodes = config_data.get('results_file_nodes', 'data.csv') if output_file is None else output_file
-        # Empty file
-        clean_csv(results_file_nodes) 
         
         config.load_kube_config()  
                 
@@ -181,7 +171,7 @@ def get_nodes_utilization(output_file=None):
                 cpu_utilization_rate = cpu_data.get(node_name, 0)
                 ram_utilization_rate = ram_data.get(node_name, 0)
                 storage_utilization_rate = storage_data.get(node_name, 0)
-                write_to_csv(results_file_nodes, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_utilization_rate))
+                write_to_csv(output_file, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_utilization_rate))
 
     except Exception as e:
         print(f"Error retrieving resource utilization and storage information:", e)
@@ -192,6 +182,7 @@ def watch_nodes():
     """
     config_data = load_config("config.yaml")
     results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
+        
     while not stop_event.is_set():
-        get_nodes_utilization(output_file=results_file_nodes)
+        get_nodes_utilization(config_data,output_file=results_file_nodes)
         time.sleep(1)
