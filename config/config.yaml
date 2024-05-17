@@ -1,4 +1,12 @@
-# Configuration file for Kubernetes cluster, pod settings and experimentation settings
+# Configuration file for experimentation, Kubernetes cluster, pod settings and experimentation settings
+
+# Configuration of experimentation
+
+expe_duration: 100 # Duration of the experimentation in seconds
+pods_interval: 1 # Average time to wait between the generation of pods
+min_number_per_interval: 2 # Lowest number of pods that can be generated for a given pods_interval
+max_number_per_interval: 6 # Highest number of pods that can be generated for a given pods_interval
+game_interval: 2 # Average time to wait between two games
 
 # Configuration for Kubernetes
 namespace: expe
@@ -9,32 +17,33 @@ cpus: 4  # Number of CPU cores per node
 
 # Configuration for experimentations results
 
+pods_dataset_file: pods_dataset.csv
 results_file_nodes: plots/results/data_nodes.csv
 results_file_pods: plots/results/data_pods.csv
-dataset: ran_dataset.csv
+ran_dataset: ran_dataset.csv
 
 # Configuration for pods. Selected pods : https://zenodo.org/records/3974220
 
 pods_config:
   - name: aeneas-pod
-    CPU: 70  # Set of CPU values in milli CPUs
-    RAM: 2000   # Set of RAM values in Mi
+    CPU: 480  # Set of CPU values in milli CPUs
+    RAM: 6500   # Set of RAM values in Mi
     storage: 220  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN
     transmission_downlink: 816
     instructions: 355555555 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
-    CPU: 80  
-    RAM: 3000  
+    CPU: 450  
+    RAM: 6000  
     storage: 250 
     transmission_uplink: 160097
     transmission_downlink: 9032 
     instructions: 195555555 # Real value : 100141000000
     deadline: 60  
   - name: mrleo-pod
-    CPU: 100 
-    RAM: 3200  
+    CPU: 350 
+    RAM: 5500  
     storage: 300 
     transmission_uplink: 41000
     transmission_downlink: 41000

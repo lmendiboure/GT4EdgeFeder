@@ -17,7 +17,7 @@ kubectl get namespace "$namespace" >/dev/null 2>&1 || kubectl create namespace "
 minikube addons enable metrics-server
 
 
-# Some other potential uses
+# Other potential fonctions
 
 # Apply priority Class management => Prioritize Guaranteeed & Burstable VS Best-effort : Could be useful if multiple queues were used (ie potential use)
 #kubectl apply -f ../config/priority_classes.yaml

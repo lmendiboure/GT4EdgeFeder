@@ -1,17 +1,17 @@
-import os
-import csv
-import yaml
 import time
+import sys
 from kubernetes import client, config, watch
 from datetime import datetime
-from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv    
-import psutil
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, clean_csv, compute_pods_number    
 import random
+import threading
+
     
+stop_event= threading.Event()
 
 def watch_pods():
     """
-    Watch pods in a specified namespace and log their phase transitions to a CSV file.
+    Watch pods in a specified namespace and log their phase transitions to a CSV file. Sends a "Stop Experiment" event when all pods have been processed (ie. number of pods completed is equal to the number of pods in the experiment file.
     """
     try: 
 
@@ -20,9 +20,16 @@ def watch_pods():
         # Get the namespace from the configuration data
         namespace = config_data['namespace']
         
+        expe_pods_number = compute_pods_number(config_data["pods_dataset_file"])
+        
+        processed_pods_number = 0
+        
         # Get the results file for pods from the configuration data, default to 'data.csv'
         results_file_pods = config_data.get('results_file_pods', 'data.csv')
-
+        
+        # Empty File  
+        clean_csv(results_file_pods)
+         	
         # Load Kubernetes configuration from default location
         config.load_kube_config()
 
@@ -39,26 +46,37 @@ def watch_pods():
             pod_phase = event['object'].status.phase
             node_name = event['object'].spec.node_name  # Get the node name
             transmission_delay = event['object'].metadata.annotations['transmission_delay']
-
+            initial_node = event['object'].metadata.annotations['initial_node']
+            
             # Get current timestamp with milliseconds
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
             # Check the phase of the pod and take appropriate action
             if pod_phase == "Pending":
                 print(f"Pod {pod_name} is now Pending.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending"])
-
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", node_name, transmission_delay, initial_node])
 
             elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
                 print(f"Pod {pod_name} is now Running on Node {node_name}. Transmission delay is equal to {transmission_delay}")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", node_name, transmission_delay])
-
-            elif pod_phase == "Failed" or pod_phase == "Succeeded":
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", node_name, transmission_delay, initial_node])
+		
+            elif pod_phase == "Succeeded":
                 print(f"Pod {pod_name} is now Completed.")
                 # Write timestamp, pod name, and phase to the CSV file
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Terminated"])
-
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Succeeded", node_name, transmission_delay, initial_node])
+                processed_pods_number+=1
+                if processed_pods_number==expe_pods_number:
+                    stop_event.set()
+                    break
+                    
+            elif pod_phase == "Failed": 
+                print(f"Pod {pod_name} has Failed.")
+                processed_pods_number+=1
+                if processed_pods_number==expe_pods_number:
+                    stop_event.set()
+                    break
+    
     except Exception as e:
         # Handle any exceptions and print error message
         print(f"Error watching pods:", e)
@@ -141,6 +159,8 @@ def get_nodes_utilization(output_file=None):
         config_data = load_config("config.yaml")   
         
         results_file_nodes = config_data.get('results_file_nodes', 'data.csv') if output_file is None else output_file
+        # Empty file
+        clean_csv(results_file_nodes) 
         
         config.load_kube_config()  
                 
@@ -172,6 +192,6 @@ def watch_nodes():
     """
     config_data = load_config("config.yaml")
     results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
-    while True:
+    while not stop_event.is_set():
         get_nodes_utilization(output_file=results_file_nodes)
         time.sleep(1)

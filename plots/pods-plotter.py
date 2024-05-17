@@ -44,17 +44,16 @@ def calculate_time_difference(file_path):
         node_names = {}  # Store node names for each pod
         transmission_delays = {} # Store transmission delays for each pod
         # Initialize dictionaries to store total times for each category and type
-        total_pending_times = defaultdict(lambda: defaultdict(int))
-        total_running_times = defaultdict(lambda: defaultdict(int))
-        count_pending = defaultdict(lambda: defaultdict(int))
-        count_running = defaultdict(lambda: defaultdict(int))
+        total_pending_times = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        total_running_times = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        count_pending = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        count_running = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         # Iterate over each line in the file
         for line in file:
             # Split the line into timestamp, pod, event, and optionally node name
             parts = line.strip().split(',')
-            timestamp_str, pod, event = parts[:3]
-            node_name = parts[3] if len(parts) >= 4 else None
-            transmission_delay = parts[4] if len(parts) > 4 else None
+            timestamp_str, pod, event, node_name, transmission_delay, origin_node = parts
+
             # Convert the timestamp string to total milliseconds
             timestamp_ms = convert_to_milliseconds(timestamp_str)
             
@@ -63,17 +62,15 @@ def calculate_time_difference(file_path):
                 # Store the pending time and node name for the pod
                 if pod not in pending_times:
                     pending_times[pod] = timestamp_ms
-                if node_name:
                     node_names[pod] = node_name
+                    transmission_delays[pod] = transmission_delay
             elif event == "Running":
                 # Store the running time and node name for the pod
                 if pod not in running_times:
                     running_times[pod] = timestamp_ms
-                if node_name:
                     node_names[pod] = node_name
-                if transmission_delay:
                     transmission_delays[pod] = transmission_delay
-            elif event == "Terminated":
+            elif event == "Succeeded":
                 # Calculate the time differences if both pending and running times exist for the pod
                 if pod in pending_times:
                     pending_time = pending_times.pop(pod)
@@ -81,11 +78,11 @@ def calculate_time_difference(file_path):
                     if time_difference_pending > 0:  # Check if time difference is positive
                         # Retrieve the node name for the pod
                         node_name = node_names.get(pod, "Unknown")
-                        print(f"Pod {pod}: Time difference (Pending-Terminated) - {time_difference_pending} milliseconds")
+                        print(f"Pod {pod}: Time difference (Pending-Succeeded) - {time_difference_pending} milliseconds, Node Name - {node_name}, Transmission Delay - {transmission_delay}")
                         category = pod.split('-pod-')[0]
                         pod_type = pod.split('-pod-')[1].split('-')[0]
-                        total_pending_times[category][pod_type] += time_difference_pending
-                        count_pending[category][pod_type] += 1
+                        total_pending_times[category][pod_type][node_name] += time_difference_pending
+                        count_pending[category][pod_type][node_name] += 1
                 if pod in running_times:
                     running_time = running_times.pop(pod)
                     time_difference_running = timestamp_ms - running_time
@@ -93,11 +90,11 @@ def calculate_time_difference(file_path):
                         # Retrieve the node name for the pod
                         node_name = node_names.get(pod, "Unknown")
                         transmission_delay = transmission_delays.get(pod, "Unknown")
-                        print(f"Pod {pod}: Time difference (Running-Terminated) - {time_difference_running} milliseconds, Node Name - {node_name}, Transmission Delay - {transmission_delay}")
+                        print(f"Pod {pod}: Time difference (Running-Succeeded) - {time_difference_running} milliseconds, Node Name - {node_name}, Transmission Delay - {transmission_delay}")
                         category = pod.split('-pod-')[0]
                         pod_type = pod.split('-pod-')[1].split('-')[0]
-                        total_running_times[category][pod_type] += time_difference_running
-                        count_running[category][pod_type] += 1
+                        total_running_times[category][pod_type][node_name] += time_difference_running
+                        count_running[category][pod_type][node_name] += 1
             else:
                 # Remove the pod from pending and running times if it's not in "Pending" or "Running" state
                 pending_times.pop(pod, None)
@@ -107,9 +104,10 @@ def calculate_time_difference(file_path):
         # Calculate and print average times after processing all lines
         for category in total_pending_times:
             for pod_type in total_pending_times[category]:
-                if count_pending[category][pod_type] > 0:
-                    avg_pending_time = total_pending_times[category][pod_type] / count_pending[category][pod_type]
-                    print(f"Category {category}, Type {pod_type}: Average Time difference (Pending-Terminated) - {avg_pending_time} milliseconds")
+                for node_name in total_pending_times[category][pod_type]:
+                    if count_pending[category][pod_type][node_name] > 0:
+                        avg_pending_time = total_pending_times[category][pod_type][node_name] / count_pending[category][pod_type][node_name]
+                        print(f"Category {category}, Type {pod_type}, Node {node_name}: Average Time difference (Pending-Succeeded) - {avg_pending_time} milliseconds")
         # Probably not necessary. Pending-Terminated seems to better represent the time spent by a service in the system.
         #for category in total_running_times:
         #    for pod_type in total_running_times[category]:
