@@ -49,6 +49,9 @@ def calculate_time_difference(file_path):
         count_pending = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         count_running = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         # Iterate over each line in the file
+        
+        print("\nPrinting per pod results\n")
+        
         for line in file:
             # Split the line into timestamp, pod, event, and optionally node name
             parts = line.strip().split(',')
@@ -102,6 +105,7 @@ def calculate_time_difference(file_path):
                 node_names.pop(pod, None)
 
         # Calculate and print average times after processing all lines
+        print("\nPrinting Results for Pods Categories/type:\n")
         for category in total_pending_times:
             for pod_type in total_pending_times[category]:
                 for node_name in total_pending_times[category][pod_type]:
@@ -114,6 +118,7 @@ def calculate_time_difference(file_path):
         #        if count_running[category][pod_type] > 0:
         #            avg_running_time = total_running_times[category][pod_type] / count_running[category][pod_type]
         #            print(f"Category {category}, Type {pod_type}: Average Time difference (Running-Terminated) - {avg_running_time} milliseconds")
+
 
 
 # Example usage

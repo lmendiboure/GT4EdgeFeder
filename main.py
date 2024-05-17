@@ -37,6 +37,10 @@ if __name__ == '__main__':
     while(1):
     	time.sleep(1)
     	if stop_event.is_set():
-        	print("******Ending experiment******\n")
-        	print("******All pods have been processed. Experiment is finished. Data can be found within the results folder.******\n")
-        	sys.exit() 
+            print("******Ending experiment******\n")
+            print("******All pods have been processed. Experiment is finished. Data can be found within the results folder.******\n")
+            # Clean pods
+            print("******Cleaning experiment******\n")	
+            print("-> Deleting pods of the experiment (if any)\n")	
+            delete_pods()
+            sys.exit() 
