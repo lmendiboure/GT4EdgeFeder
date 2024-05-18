@@ -66,7 +66,7 @@ def watch_pods():
                 if processed_pods_number==expe_pods_number:
                     stop_event.set()
                     break
-                    
+            # So far only get the info for failed pods.         
             elif pod_phase == "Failed": 
                 print(f"Pod {pod_name} has Failed.")
                 processed_pods_number+=1
@@ -82,7 +82,7 @@ def watch_pods():
 def get_cluster_node_usage(api_instance, config_data):
     """Get the ephemeral storage usage for all nodes in the Kubernetes cluster."""
     try:
-
+	# Retrieve infos from config file
         namespace = config_data['namespace']
         
         disk_size = config_data['disk_size']
@@ -100,6 +100,7 @@ def get_cluster_node_usage(api_instance, config_data):
         ram_data = {}
 
         nodes = api_instance.list_node().items
+        # Compute usage for each node
         for index, node in enumerate(nodes):
             # Get Node Info
             node_name = node.metadata.name
@@ -113,7 +114,7 @@ def get_cluster_node_usage(api_instance, config_data):
             total_ram_used = 0
 
             pods = api_instance.list_namespaced_pod(namespace=namespace, field_selector=f"spec.nodeName={node_name}").items
-
+	    # Get pods infos to determine the used resources
             for pod in pods:
                 if pod.status.phase == "Running":
                     for pod_config in config_data.get('pods_config', []):
@@ -136,7 +137,7 @@ def get_cluster_node_usage(api_instance, config_data):
                                 pod_ram_usage = random.randint(0, pod_config['RAM'])
                                 total_ram_used += pod_ram_usage/10    
                             
-
+	    # Store data for each node	
             storage_data[node_name] = (total_storage_used/node_storage)*100
             cpu_data[node_name] = (total_cpu_used/node_cpu)*100
             ram_data[node_name] = (total_ram_used/node_ram)*100
@@ -167,6 +168,7 @@ def get_nodes_utilization(config_data,output_file=None):
         
         else: 
             for node in nodes:
+                # Retrieve and store infos
                 node_name = node.metadata.name
                 cpu_utilization_rate = cpu_data.get(node_name, 0)
                 ram_utilization_rate = ram_data.get(node_name, 0)
@@ -176,6 +178,8 @@ def get_nodes_utilization(config_data,output_file=None):
     except Exception as e:
         print(f"Error retrieving resource utilization and storage information:", e)
 
+    
+    
 def watch_nodes():
     """
     Get nodes data for a specific namespace.Complete data result file every second.

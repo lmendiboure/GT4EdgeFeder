@@ -2,6 +2,7 @@ import os
 import csv
 import yaml
 import time
+from math import ceil
 from kubernetes import client, config, watch
 from datetime import datetime
 
@@ -115,21 +116,18 @@ def clean_experiment_files():
     clean_csv(results_file_pods)
     clean_csv(results_file_nodes)
 
-def node_name_finder(node_number):
-    """
-    Get node name from node number
-
-    Args:
-        node number (int): Number of the node
-    """
-    number=str(node_number)
-    if node_number==1:
-    	return "minikube"
-    elif node_number <10:
-        return f"minikube-m0{number}"    
-    else:
-        return f"minikube-m{number}"
-    
+def get_inter_node_delay(config_data,origin_node,destination_node,data):
+    """Get the latency associated with the transmission of data between nodes (ie pod transfer)."""
+    delay=0
+    # Find node in config_data
+    for node in config_data["nodes_config"]:
+        if node["id"] == origin_node:
+            # Find destination node
+            for connection in node["connections"]:
+                if connection["target_node"] == destination_node:
+                    # Sum latency + time to transmit data (uplink + downlink)
+                    delay = ceil(connection["latency"] + data/connection["bandwidth"])
+    return delay
     
 def parse_memory_string(memory_string):
     """

@@ -51,11 +51,24 @@ pods_config:
     deadline: 33
     
    
-# Configuration for nodes. Percentage of resources each node corresponds to.
+# Configuration for nodes. Verify that the names used really corresponds to the names defined by Minikube.
 nodes_config:
-  - CPU_percentage: 0.65
+  # Node 1
+  - id: minikube
+    CPU_percentage: 0.65
     RAM_percentage: 0.6
     storage_percentage: 0.4
-  - CPU_percentage: 0.35
+    connections:
+      - target_node: minikube-m02
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB
+  # Node 2
+  - id: minikube-m02
+    CPU_percentage: 0.35
     RAM_percentage: 0.4
     storage_percentage: 0.6 
+    connections:
+      - target_node: minikube
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB
+  # Node X

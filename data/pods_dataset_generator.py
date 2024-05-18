@@ -2,7 +2,7 @@ import random
 import math
 import sys
 sys.path.append('../functions')
-from utils import load_config, write_to_csv, load_dataset, clean_csv,node_name_finder     
+from utils import load_config, write_to_csv, load_dataset, clean_csv     
 
 
 # Function to generate random pod config from config file. We need to type on information: 1)pod name (ie application type) and 2) data to transmit to estimate transmission delays 
@@ -52,7 +52,7 @@ def generate_pods_dataset():
             
             pod_name = f"{pod_config['name']}-{pod_type[0]}{pod_type[1]}-{pod_counter}" # Unique pod name
             
-            node_name = node_name_finder(random.randint(1, config_data["nodes_number"])) # Random node to attach pod
+            node_name = config_data["nodes_config"][(random.randint(0, config_data["nodes_number"]-1))]["id"] # Random node to attach pod
             
             ran_delay=get_ran_infos_for_pods(config_data,pod_config) # Compute transmission delay
             

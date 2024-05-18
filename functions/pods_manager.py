@@ -5,7 +5,7 @@ import csv
 import math
 from datetime import datetime
 from kubernetes import client, config, watch
-from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset     
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset, get_inter_node_delay     
 import os   
 	
 # Function to get the list of available nodes
@@ -43,15 +43,18 @@ def get_pod_config_by_type(pods_config, pod_name):
     return None
     
 # Function to get pod configuration and namespace from loaded config
-def get_pod_config(config_data,pod):
+def get_pod_config(config_data,pod,running_node):
+    
     pod_name=pod[1]
     pod_type=pod[2]	    
     pod_class=pod[3]
     initial_node=pod[4]
     pod_ran_delay=pod[5]
-
+ 
     pod_config = get_pod_config_by_type(config_data['pods_config'], pod_type)
-    
+    pod_data= pod_config["transmission_uplink"]+pod_config["transmission_downlink"]
+    inter_node_delay= get_inter_node_delay(config_data,initial_node,running_node,pod_data)
+
     return {
         "name": pod_name,  # Name of the pod
         "CPU": pod_config["CPU"],    # CPU value in milli CPUs
@@ -61,7 +64,9 @@ def get_pod_config(config_data,pod):
         "pod_ran_delay":pod_ran_delay, # Pod communication delay
         "pod_class": pod_class, # Class of the pod : gu/bu/be
         "initial_node": initial_node, # Node receiving the request
-        "namespace": config_data["namespace"] # Namespace for pod
+        "namespace": config_data["namespace"], # Namespace for pod
+        "inter_node_delay": inter_node_delay
+        
     }
 # Function to generate resource limits based on pod type
 def generate_resources(pod_config):
@@ -182,7 +187,8 @@ def run_pods(node_selection_func):
             for pod in new_pods:
                 running_node = node_selection_func(available_nodes)
                 # Get pod config
-                pod_config = get_pod_config(config_data,pod)        
+                pod_config = get_pod_config(config_data,pod,running_node)
+                print(pod_config["inter_node_delay"])        
                 launch_pod(running_node, pod_config, api_instance)
 
         current_time+= game_interval    
