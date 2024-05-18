@@ -7,7 +7,7 @@ def parse_csv(file_path):
         reader = csv.reader(file)
         next(reader)  # Skip the header row
         for row in reader:
-            timestamp, pod, status, initial_node, transmission_delay, current_node = row
+            timestamp, pod, status, current_node, initial_node, transmission_delay, inter_node_delay = row
             category = pod.split('-pod-')[0]
             pod_type = pod.split('-pod-')[1].split('-')[0]
             pod_data[pod] = (timestamp, pod, status, initial_node, current_node, category, pod_type)

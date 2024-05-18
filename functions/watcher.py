@@ -41,9 +41,10 @@ def watch_pods():
             # Extract pod name and phase from the event
             pod_name = event['object'].metadata.name
             pod_phase = event['object'].status.phase
-            node_name = event['object'].spec.node_name  # Get the node name
+            running_node = event['object'].spec.node_name  # Get the node name
             transmission_delay = event['object'].metadata.annotations['transmission_delay']
             initial_node = event['object'].metadata.annotations['initial_node']
+            inter_node_delay = event['object'].metadata.annotations['inter_node_delay']
             
             # Get current timestamp with milliseconds
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -51,17 +52,17 @@ def watch_pods():
             # Check the phase of the pod and take appropriate action
             if pod_phase == "Pending":
                 print(f"Pod {pod_name} is now Pending.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", node_name, transmission_delay, initial_node])
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", running_node, initial_node, transmission_delay, inter_node_delay])
 
             elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
-                print(f"Pod {pod_name} is now Running on Node {node_name}. Transmission delay is equal to {transmission_delay}")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", node_name, transmission_delay, initial_node])
+                print(f"Pod {pod_name} is now Running on Node {running_node}. Transmission delay is equal to {transmission_delay}. Inter node delay is equal to {inter_node_delay}")
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", running_node, initial_node, transmission_delay, inter_node_delay])
 		
             elif pod_phase == "Succeeded":
                 print(f"Pod {pod_name} is now Completed.")
                 # Write timestamp, pod name, and phase to the CSV file
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Succeeded", node_name, transmission_delay, initial_node])
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Succeeded", running_node, initial_node, transmission_delay, inter_node_delay])
                 processed_pods_number+=1
                 if processed_pods_number==expe_pods_number:
                     stop_event.set()

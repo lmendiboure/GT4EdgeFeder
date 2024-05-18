@@ -120,7 +120,8 @@ def get_pod_spec(running_node, pod_config):
             "namespace": pod_config["namespace"],
             "annotations": {
                 "transmission_delay": str(pod_config["pod_ran_delay"]),
-                "initial_node": pod_config["initial_node"]
+                "initial_node": pod_config["initial_node"],
+                "inter_node_delay" : str(pod_config["inter_node_delay"])
             }
         },
         "spec": {
@@ -188,7 +189,6 @@ def run_pods(node_selection_func):
                 running_node = node_selection_func(available_nodes)
                 # Get pod config
                 pod_config = get_pod_config(config_data,pod,running_node)
-                print(pod_config["inter_node_delay"])        
                 launch_pod(running_node, pod_config, api_instance)
 
         current_time+= game_interval    

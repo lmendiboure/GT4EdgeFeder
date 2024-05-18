@@ -29,7 +29,7 @@ pods_config:
     CPU: 480  # Set of CPU values in milli CPUs
     RAM: 6500   # Set of RAM values in Mi
     storage: 220  # Storage capacity for the nginx pod in MB
-    transmission_uplink: 427347 # bits to transmit over RAN
+    transmission_uplink: 427347 # bits to transmit over RAN (Bits)
     transmission_downlink: 816
     instructions: 355555555 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
@@ -49,7 +49,14 @@ pods_config:
     transmission_downlink: 41000
     instructions: 255555555 # Real value : 544271527
     deadline: 33
-    
+  - name: edgestorage-pod
+    CPU: 20 
+    RAM: 20  
+    storage: 1000 # 1Go
+    transmission_uplink: 1000000 
+    transmission_downlink: 1000000
+    instructions: 10 # Not instructions only data transfer
+    deadline: 33 
    
 # Configuration for nodes. Verify that the names used really corresponds to the names defined by Minikube.
 nodes_config:
@@ -61,7 +68,7 @@ nodes_config:
     connections:
       - target_node: minikube-m02
         latency: 10 # Delay in ms
-        bandwidth: 1000000 # Bandwidth in MB
+        bandwidth: 1000000 # Bandwidth in MB per second
   # Node 2
   - id: minikube-m02
     CPU_percentage: 0.35
@@ -70,5 +77,5 @@ nodes_config:
     connections:
       - target_node: minikube
         latency: 10 # Delay in ms
-        bandwidth: 1000000 # Bandwidth in MB
+        bandwidth: 1000000 # Bandwidth in MB per second
   # Node X
