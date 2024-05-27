@@ -51,7 +51,8 @@ def calculate_time_difference(file_path):
         # Iterate over each line in the file
         
         print("\nPrinting per pod results\n")
-        
+        # Skip the first line
+        next(file)
         for line in file:
             # Split the line into timestamp, pod, event, and optionally node name
             parts = line.strip().split(',')

@@ -37,7 +37,7 @@ def load_dataset(filename):
     project_root = os.path.dirname(script_dir)
     file_path = os.path.join(project_root, "data", filename)
     with open(file_path, 'r') as file:
-        lines = file.readlines()
+        lines = file.readlines()[1:]
            
     return lines
 
@@ -114,7 +114,11 @@ def clean_experiment_files():
     
     # Empty Files  
     clean_csv(results_file_pods)
+    data=["timestamp", "pod_name", "Status", "initial_node", "running_node", "ran_delay", "inter_node_delay"]
+    write_to_csv(results_file_pods, data)
+    data=["timestamp", "node_name", "CPU", "RAM", "storage"]
     clean_csv(results_file_nodes)
+
 
 def get_inter_node_delay(config_data,origin_node,destination_node,data):
     """Get the latency associated with the transmission of data between nodes (ie pod transfer)."""

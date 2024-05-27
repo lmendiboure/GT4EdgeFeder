@@ -31,7 +31,7 @@ pods_config:
     storage: 820  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN (Bits)
     transmission_downlink: 816
-    instructions: 4555555 # Real value : 8807684292 # number of instructions to be done
+    instructions: 544271527 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
     CPU: 450  
@@ -39,7 +39,7 @@ pods_config:
     storage: 2500 
     transmission_uplink: 160097
     transmission_downlink: 9032 
-    instructions: 255555 # Real value : 100141000000 ; Usually Used
+    instructions: 544271527 # Real value : 100141000000 ; Usually Used
     deadline: 60  
   - name: mrleo-pod
     CPU: 350 
@@ -47,7 +47,7 @@ pods_config:
     storage: 950 
     transmission_uplink: 41000
     transmission_downlink: 41000
-    instructions: 9555555 # Real value : 544271527
+    instructions: 544271527 # Real value : 544271527
     deadline: 33
 #  - name: edgestorage-pod
 #    CPU: 20 

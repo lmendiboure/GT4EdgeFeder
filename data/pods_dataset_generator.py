@@ -40,6 +40,10 @@ def generate_pods_dataset():
 
     clean_csv(pods_dataset_file) # Empty this file
     
+    data = ["start_time", "name", "type", "class", "initial_name", "ran_delay"]
+    
+    write_to_csv(pods_dataset_file,data) # Add first line
+    
     while (time<=config_data["expe_duration"]): # Generate pods all along the experimentation
 
         num_pods = random.randint(config_data["min_number_per_interval"], config_data["max_number_per_interval"]) # Random number of pods at each step
