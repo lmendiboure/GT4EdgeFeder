@@ -122,9 +122,9 @@ def get_cluster_node_usage(api_instance, config_data):
                                 pod_ram_usage = pod_config['RAM']
                                 total_ram_used += pod_ram_usage   
                             elif "be" in pod.metadata.name:
-                                pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU'])
+                                pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU']*2)
                                 total_cpu_used += pod_cpu_usage/1000
-                                pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM'])
+                                pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM']*2)
                                 total_ram_used += pod_ram_usage    
                             
 	    # Store data for each node	
