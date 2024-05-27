@@ -7,12 +7,6 @@ from datetime import datetime
 from kubernetes import client, config, watch
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset, get_inter_node_delay     
 import os   
-	
-# Function to get the list of available nodes
-def get_available_nodes(api_instance):
-    nodes = api_instance.list_node().items
-    return [node.metadata.name for node in nodes]
-    
     
 # Function to determine the priority class of a pod. Priority class is directly linked to the type of pod. Not useful in GT paper.    
 def get_pod_priority_class(pod_class):
@@ -41,9 +35,18 @@ def get_pod_config_by_type(pods_config, pod_name):
         if pod_config['name'] == pod_name:
             return pod_config
     return None
+
+
+# Function to get performance expectations associated with a given pod
+def get_pod_cost(config_data,pod):
+    pod_name=pod[1]
+    pod_type=pod[2]	    
+    pod_class=pod[3]
+    initial_node=pod[4]
+    pod_ran_delay=pod[5]
     
 # Function to get pod configuration and namespace from loaded config
-def get_pod_config(config_data,pod,running_node):
+def get_pod_config(config_data,pod):
     
     pod_name=pod[1]
     pod_type=pod[2]	    
@@ -52,20 +55,20 @@ def get_pod_config(config_data,pod,running_node):
     pod_ran_delay=pod[5]
  
     pod_config = get_pod_config_by_type(config_data['pods_config'], pod_type)
-    pod_data= pod_config["transmission_uplink"]+pod_config["transmission_downlink"]
-    inter_node_delay= get_inter_node_delay(config_data,initial_node,running_node,pod_data)
+    pod_transmission_data= pod_config["transmission_uplink"]+pod_config["transmission_downlink"]
 
     return {
         "name": pod_name,  # Name of the pod
         "CPU": pod_config["CPU"],    # CPU value in milli CPUs
         "RAM": pod_config["RAM"],    # RAM value in Mi
+        "storage":pod_config["storage"],  # Storage in Mi
         "instructions":pod_config["instructions"],
         "namespace": config_data["namespace"],  # Namespace
         "pod_ran_delay":pod_ran_delay, # Pod communication delay
         "pod_class": pod_class, # Class of the pod : gu/bu/be
         "initial_node": initial_node, # Node receiving the request
         "namespace": config_data["namespace"], # Namespace for pod
-        "inter_node_delay": inter_node_delay
+        "pod_transmission_data": pod_transmission_data # Data that should be transmissed for this pod
         
     }
 # Function to generate resource limits based on pod type
@@ -91,7 +94,7 @@ def generate_resources(pod_config):
         return {}
         
         
-def get_pod_spec(running_node, pod_config):
+def get_pod_spec(config_data,running_node, pod_config):
     """
     Generate the specification for the pod.
 
@@ -109,7 +112,7 @@ def get_pod_spec(running_node, pod_config):
     instructions = pod_config["instructions"]
     
     resources = generate_resources(pod_config)
-
+    inter_node_delay= get_inter_node_delay(config_data,pod_config["initial_node"],running_node,pod_config["pod_transmission_data"])
     # Priority class could be useful is pods should be prioritized at execution (ie multiple queues), line below enables to retrieve information regarding priority class
     # priority_class = get_pod_priority_class(pod_type) 
     spec = {
@@ -121,7 +124,7 @@ def get_pod_spec(running_node, pod_config):
             "annotations": {
                 "transmission_delay": str(pod_config["pod_ran_delay"]),
                 "initial_node": pod_config["initial_node"],
-                "inter_node_delay" : str(pod_config["inter_node_delay"])
+                "inter_node_delay" : str(inter_node_delay)
             }
         },
         "spec": {
@@ -144,10 +147,10 @@ def get_pod_spec(running_node, pod_config):
     return spec    
 
 # Function to launch a pod on a random node 
-def launch_pod(running_node, pod_config, api_instance):
+def launch_pod(config_data,running_node, pod_config, api_instance):
     
     # Define pod specification
-    pod_manifest = get_pod_spec(running_node, pod_config)
+    pod_manifest = get_pod_spec(config_data,running_node, pod_config)
     
     # Create the pod
     api_instance.create_namespaced_pod(namespace=pod_config["namespace"], body=pod_manifest)
@@ -165,31 +168,5 @@ def get_interval_pods_lists(config_data,interval_min,interval_max):
             matching_pods.append(pod_data)
     return matching_pods
 
-        
-        
-def run_pods(node_selection_func):
 
-    config_data = load_config("config.yaml")
-    
-    current_time= 0
-    game_interval = config_data["game_interval"]
-
-    config.load_kube_config()
-    api_instance = client.CoreV1Api()
-
-    # Get the list of available nodes
-    available_nodes = get_available_nodes(api_instance)
-
-    # Launch pods periodically
-    while current_time<=config_data["expe_duration"]:
-        time.sleep(config_data["game_interval"])
-        new_pods=get_interval_pods_lists(config_data, current_time, current_time+game_interval)
-        if new_pods:
-            for pod in new_pods:
-                running_node = node_selection_func(available_nodes)
-                # Get pod config
-                pod_config = get_pod_config(config_data,pod,running_node)
-                launch_pod(running_node, pod_config, api_instance)
-
-        current_time+= game_interval    
 

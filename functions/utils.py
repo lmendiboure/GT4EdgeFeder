@@ -150,7 +150,41 @@ def parse_memory_string(memory_string):
     else:
         raise ValueError("Invalid memory string format")
         
+# Function to get the list of available nodes
+def get_available_nodes(api_instance):
+    nodes = api_instance.list_node().items
+    return [node.metadata.name for node in nodes]
+
+
+# Function to get the resources available on a given node (using node index in config file)
+def get_node_resources_infos(config_data, index):
+    disk_size = config_data['disk_size']
         
+    nodes_number = config_data['nodes_number']
+        
+    available_cpu = config_data['cpus']*nodes_number
+        
+    available_ram = config_data['memory']*nodes_number
+        
+    storage_size = disk_size
+    
+    node_cpu = available_cpu*config_data['nodes_config'][index]['CPU_percentage']
+    node_ram=available_ram*config_data['nodes_config'][index]['RAM_percentage']
+    node_storage= storage_size*config_data['nodes_config'][index]['storage_percentage']
+    
+    return node_cpu, node_ram, node_storage
+  
+def order_nodes_by_delay(config_data, initial_node):
+    
+    node = next((n for n in config_data["nodes_config"] if n['id'] == initial_node), None)  
+    
+    if not node:
+        return []
+    
+    sorted_connections= sorted(node['connections'], key=lambda x: x['latency'])
+    
+    return [connection['target_node'] for connection in sorted_connections]
+
 def delete_pods():
     """
     Delete all pods in the specified namespace.

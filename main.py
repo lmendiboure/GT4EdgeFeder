@@ -1,9 +1,8 @@
 import threading
 from functions.watcher import watch_nodes,watch_pods, stop_event
 import time
-from functions.pods_manager import run_pods
 from functions.utils import delete_pods, clean_experiment_files
-from functions.nodes_selector import multi_parameter_gt_node_selector, cpu_gt_node_selector, random_node_selector
+from functions.nodes_manager import multi_parameter_gt_node_selector, cpu_gt_node_selector, dynamic_selfish_node_selector, selfish_node_selector, run_experimentation
 import sys
 
 if __name__ == '__main__':
@@ -30,7 +29,7 @@ if __name__ == '__main__':
     pods_watcher_thread.start()
     
     # Run experiment
-    run_experiment_thread= threading.Thread(target=run_pods, args=(random_node_selector,))
+    run_experiment_thread= threading.Thread(target=run_experimentation, args=(multi_parameter_gt_node_selector,))
     run_experiment_thread.start()
     
     # Catch Stop Experiment Event from Pod Watcher

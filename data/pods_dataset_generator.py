@@ -19,7 +19,7 @@ def generate_pod_config(config_data):
 # Function to determine the latency associated with data transmission for a given pod. Based on data produced by measurements made in an EU project. Idea is to randomly select a measured value and compute transmission time based on the information related to a given Edge service.   
 def get_ran_infos_for_pods(config_data,pod_config):
     lines=load_dataset(config_data['ran_dataset'])
-    random_line = random.choice(lines)
+    random_line = random.choice(lines[1:])
     data = random_line.strip().split(',')
     traffic_load = int(data[11])
     latency = int(data[12])

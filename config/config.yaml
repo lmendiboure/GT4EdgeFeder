@@ -6,7 +6,7 @@ expe_duration: 100 # Duration of the experimentation in seconds
 pods_interval: 1 # Average time to wait between the generation of pods
 min_number_per_interval: 2 # Lowest number of pods that can be generated for a given pods_interval
 max_number_per_interval: 6 # Highest number of pods that can be generated for a given pods_interval
-game_interval: 2 # Average time to wait between two games
+game_interval: 0.5 # Average time to wait between two games
 
 # Configuration for Kubernetes
 namespace: expe
@@ -27,36 +27,36 @@ ran_dataset: ran_dataset.csv
 pods_config:
   - name: aeneas-pod
     CPU: 480  # Set of CPU values in milli CPUs
-    RAM: 6500   # Set of RAM values in Mi
-    storage: 220  # Storage capacity for the nginx pod in MB
+    RAM: 5000   # Set of RAM values in Mi
+    storage: 820  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN (Bits)
     transmission_downlink: 816
-    instructions: 355555555 # Real value : 8807684292 # number of instructions to be done
+    instructions: 4555555 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
     CPU: 450  
-    RAM: 6000  
-    storage: 250 
+    RAM: 4500  
+    storage: 2500 
     transmission_uplink: 160097
     transmission_downlink: 9032 
-    instructions: 195555555 # Real value : 100141000000
+    instructions: 255555 # Real value : 100141000000 ; Usually Used
     deadline: 60  
   - name: mrleo-pod
     CPU: 350 
-    RAM: 5500  
-    storage: 300 
+    RAM: 6500  
+    storage: 950 
     transmission_uplink: 41000
     transmission_downlink: 41000
-    instructions: 255555555 # Real value : 544271527
+    instructions: 9555555 # Real value : 544271527
     deadline: 33
-  - name: edgestorage-pod
-    CPU: 20 
-    RAM: 20  
-    storage: 1000 # 1Go
-    transmission_uplink: 1000000 
-    transmission_downlink: 1000000
-    instructions: 10 # Not instructions only data transfer
-    deadline: 33 
+#  - name: edgestorage-pod
+#    CPU: 20 
+#    RAM: 20  
+#    storage: 1000 # 1Go
+#     transmission_uplink: 1000000 
+#    transmission_downlink: 1000000
+#    instructions: 10 # Not instructions only data transfer
+#    deadline: 33 
    
 # Configuration for nodes. Verify that the names used really corresponds to the names defined by Minikube.
 nodes_config:

@@ -2,12 +2,13 @@ import time
 import sys
 from kubernetes import client, config, watch
 from datetime import datetime
-from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, compute_pods_number    
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, compute_pods_number, get_available_nodes, get_node_resources_infos
 import random
 import threading
 
     
 stop_event= threading.Event()
+
 
 def watch_pods():
     """
@@ -70,6 +71,7 @@ def watch_pods():
             # So far only get the info for failed pods.         
             elif pod_phase == "Failed": 
                 print(f"Pod {pod_name} has Failed.")
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Failed", running_node, initial_node, transmission_delay, inter_node_delay])
                 processed_pods_number+=1
                 if processed_pods_number==expe_pods_number:
                     stop_event.set()
@@ -85,29 +87,16 @@ def get_cluster_node_usage(api_instance, config_data):
     try:
 	# Retrieve infos from config file
         namespace = config_data['namespace']
-        
-        disk_size = config_data['disk_size']
-        
-        nodes_number = config_data['nodes_number']
-        
-        available_cpu = config_data['cpus']*nodes_number
-        
-        available_ram = config_data['memory']*nodes_number
-        
-        storage_size = disk_size 
 
         storage_data = {}
         cpu_data = {}
         ram_data = {}
-
         nodes = api_instance.list_node().items
         # Compute usage for each node
         for index, node in enumerate(nodes):
             # Get Node Info
             node_name = node.metadata.name
-            node_cpu = available_cpu*config_data['nodes_config'][index]['CPU_percentage']
-            node_ram=available_ram*config_data['nodes_config'][index]['RAM_percentage']
-            node_storage= storage_size*config_data['nodes_config'][index]['storage_percentage']
+            node_cpu, node_ram, node_storage= get_node_resources_infos(config_data, index)
 
             # Store load values
             total_storage_used = 0
@@ -117,7 +106,7 @@ def get_cluster_node_usage(api_instance, config_data):
             pods = api_instance.list_namespaced_pod(namespace=namespace, field_selector=f"spec.nodeName={node_name}").items
 	    # Get pods infos to determine the used resources
             for pod in pods:
-                if pod.status.phase == "Running":
+                if pod.status.phase == "Running" or pod.status.phase == "Pending":
                     for pod_config in config_data.get('pods_config', []):
                         if pod.metadata.name.startswith(pod_config['name']):
                             pod_storage_usage = pod_config['storage']
@@ -126,17 +115,17 @@ def get_cluster_node_usage(api_instance, config_data):
                                 pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU'])
                                 total_cpu_used += pod_cpu_usage/1000
                                 pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM'])
-                                total_ram_used += pod_ram_usage/10    
+                                total_ram_used += pod_ram_usage    
                             elif "gu" in pod.metadata.name:
                                 pod_cpu_usage = pod_config['CPU']
-                                total_cpu_used += pod_cpu_usage//1000
-                                pod_ram_usage = pod_config['RAM']
-                                total_ram_used += pod_ram_usage/10   
-                            elif "be" in pod.metadata.name:
-                                pod_cpu_usage = random.randint(0, pod_config['CPU'])
                                 total_cpu_used += pod_cpu_usage/1000
-                                pod_ram_usage = random.randint(0, pod_config['RAM'])
-                                total_ram_used += pod_ram_usage/10    
+                                pod_ram_usage = pod_config['RAM']
+                                total_ram_used += pod_ram_usage   
+                            elif "be" in pod.metadata.name:
+                                pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU'])
+                                total_cpu_used += pod_cpu_usage/1000
+                                pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM'])
+                                total_ram_used += pod_ram_usage    
                             
 	    # Store data for each node	
             storage_data[node_name] = (total_storage_used/node_storage)*100
@@ -190,4 +179,4 @@ def watch_nodes():
         
     while not stop_event.is_set():
         get_nodes_utilization(config_data,output_file=results_file_nodes)
-        time.sleep(1)
+        time.sleep(2)
