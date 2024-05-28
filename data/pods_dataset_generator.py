@@ -31,6 +31,8 @@ def get_ran_infos_for_pods(config_data,pod_config):
 def generate_pods_dataset():
     
     config_data = load_config("config.yaml")
+
+    random.seed(config_data["reproductible_seed"]) # Initialize PRNG for reproductibility purposes
     
     pod_counter = 1  # Initialize pod counter
 
