@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "This script is written for a debian-based machine."
+
 # Install dependencies
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
