@@ -112,9 +112,10 @@ def get_cluster_node_usage(api_instance, config_data):
                             pod_storage_usage = pod_config['storage']
                             total_storage_used += pod_storage_usage
                             if "bu" in pod.metadata.name:
-                                pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU'])
+                                # Kubernetes, allocates a variable amount for burstable between Max/2 and Max
+                                pod_cpu_usage = random.uniform(pod_config['CPU']/2, pod_config['CPU'])
                                 total_cpu_used += pod_cpu_usage/1000
-                                pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM'])
+                                pod_ram_usage = random.uniform(pod_config['RAM']/2, pod_config['RAM'])
                                 total_ram_used += pod_ram_usage    
                             elif "gu" in pod.metadata.name:
                                 pod_cpu_usage = pod_config['CPU']
@@ -122,20 +123,21 @@ def get_cluster_node_usage(api_instance, config_data):
                                 pod_ram_usage = pod_config['RAM']
                                 total_ram_used += pod_ram_usage   
                             elif "be" in pod.metadata.name:
-                                pod_cpu_usage = random.randint(pod_config['CPU']/2, pod_config['CPU']*2)
+                                # Kubernetes, allocates a variable amount for best effort between Max/4 and Max
+                                pod_cpu_usage = random.uniform(pod_config['CPU']/4, pod_config['CPU'])
                                 total_cpu_used += pod_cpu_usage/1000
-                                pod_ram_usage = random.randint(pod_config['RAM']/2, pod_config['RAM']*2)
+                                pod_ram_usage = random.uniform(pod_config['RAM']/4, pod_config['RAM'])
                                 total_ram_used += pod_ram_usage    
                             
-	    # Store data for each node	
-            storage_data[node_name] = (total_storage_used/node_storage)*100
-            cpu_data[node_name] = (total_cpu_used/node_cpu)*100
-            ram_data[node_name] = (total_ram_used/node_ram)*100
+	    # Store data for each node (With Minikube, load levels can rise to around 105%, so we minimise to display 100 at max.)	
+            storage_data[node_name] = min((total_storage_used/node_storage)*100,100)
+            cpu_data[node_name] = min((total_cpu_used/node_cpu)*100,100)
+            ram_data[node_name] = min((total_ram_used/node_ram)*100,100)
 
         return storage_data, cpu_data, ram_data
 
     except Exception as e:
-        print(f"Error retrieving ephemeral storage utilization information:", e)
+        print(f"Error retrieving cluster node usage information:", e)
         return None
 
 
@@ -150,13 +152,9 @@ def get_nodes_utilization(config_data,output_file=None):
         nodes = api_instance.list_node().items
         # Compute usage
         storage_data, cpu_data, ram_data = get_cluster_node_usage(api_instance, config_data)
-        print(f"Storage:{storage_data}, CPU:{cpu_data}, RAM:{ram_data}")
-        timestamp = datetime.now()
        
-        if output_file is None:
-            return storage_data, cpu_data, ram_data
-        
-        else: 
+        if output_file:
+            timestamp = datetime.now()
             for node in nodes:
                 # Retrieve and store infos
                 node_name = node.metadata.name
@@ -164,9 +162,9 @@ def get_nodes_utilization(config_data,output_file=None):
                 ram_utilization_rate = ram_data.get(node_name, 0)
                 storage_utilization_rate = storage_data.get(node_name, 0)
                 write_to_csv(output_file, (timestamp, node_name, cpu_utilization_rate, ram_utilization_rate, storage_utilization_rate))
-
+        return storage_data, cpu_data, ram_data
     except Exception as e:
-        print(f"Error retrieving resource utilization and storage information:", e)
+        print(f"Error getting node utilization:", e)
 
     
     
@@ -178,5 +176,6 @@ def watch_nodes():
     results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
         
     while not stop_event.is_set():
-        get_nodes_utilization(config_data,output_file=results_file_nodes)
+        storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=results_file_nodes)
+        print(f"Storage:{storage_data}, CPU:{cpu_data}, RAM:{ram_data}")
         time.sleep(2)

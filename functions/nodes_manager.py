@@ -10,18 +10,17 @@ import os
 
 # Reproduces Multi-Parameter Game Theory Node selection 
 def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,api_instance):
-    
     storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=None)
     node_list = {node: {} for node in available_nodes}
 
     # Initialize nodes infos: maximum load that can be achieved and current load
     for index, node in enumerate(available_nodes):
         max_cpu, max_ram, max_storage = get_node_resources_infos(config_data, index)
-        node_list[node]["cpu_used"]= cpu_data.get(node, 0)*max_cpu
+        node_list[node]["cpu_used"]= cpu_data.get(node, 0)/100*max_cpu
         node_list[node]["cpu_max"] = max_cpu
-        node_list[node]["ram_used"] = ram_data.get(node, 0) * max_ram
+        node_list[node]["ram_used"] = ram_data.get(node, 0)/100 * max_ram
         node_list[node]["ram_max"] = max_ram
-        node_list[node]["storage_used"] = storage_data.get(node, 0) * max_storage
+        node_list[node]["storage_used"] = storage_data.get(node, 0)/100 * max_storage
         node_list[node]["storage_max"] = max_storage
     
     for pod in waiting_pods:
@@ -35,6 +34,7 @@ def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,ap
 
         # Check if initial node is able to manage this pod
         if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < node_list[initial_node]["cpu_max"] and (node_list[initial_node]["ram_used"] + pod_ram) < node_list[initial_node]["ram_max"] and (node_list[initial_node]["storage_used"] + pod_storage) < node_list[initial_node]["storage_max"]):
+            
             node_list[initial_node]["cpu_used"] += pod_cpu/1000
             node_list[initial_node]["ram_used"] += pod_ram
             node_list[initial_node]["storage_used"] += pod_storage
@@ -176,13 +176,11 @@ def run_experimentation(node_selection_func):
     
         # Wait for a game interval
         time.sleep(config_data["game_interval"])
-	
 	# Add pods corresponding to the current time slot
         if (current_time<=config_data["expe_duration"]):
             new_pods=get_interval_pods_lists(config_data, current_time, current_time+game_interval)
 
         waiting_pods.extend(new_pods)
-
         # Sort waiting pods list by priority
 
         waiting_pods=sorted(waiting_pods, key=custom_sort_key)
