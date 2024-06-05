@@ -1,8 +1,9 @@
 import threading
 from functions.watcher import watch_nodes,watch_pods, stop_event
 import time
-from functions.utils import delete_pods, clean_experiment_files
+from functions.utils import delete_pods, clean_experiment_files, load_config
 from functions.nodes_manager import multi_parameter_gt_node_selector, cpu_gt_node_selector, dynamic_selfish_node_selector, selfish_node_selector, run_experimentation
+import random
 import sys
 
 if __name__ == '__main__':
@@ -19,6 +20,10 @@ if __name__ == '__main__':
     
     # Running new experiment
     print("******Starting new experiment******\n")
+
+    # Initialize randomness sequences
+    config_data = load_config("config.yaml")
+    random.seed(config_data["reproductible_seed"]) # Initialize PRNG for reproductibility purposes
     
     # Run a thread measuring every second nodes nodes stats
     nodes_watcher_thread = threading.Thread(target=watch_nodes)
