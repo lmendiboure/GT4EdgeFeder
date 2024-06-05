@@ -10,7 +10,7 @@ import os
 
 # Reproduces Multi-Parameter Game Theory Node selection 
 def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,api_instance):
-    
+    print(get_nodes_utilization(config_data,output_file=None))
     storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=None)
     node_list = {node: {} for node in available_nodes}
 
