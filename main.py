@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import threading
 from functions.watcher import watch_nodes,watch_pods, stop_event
 import time
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     pods_watcher_thread.start()
     
     # Run experiment
-    run_experiment_thread= threading.Thread(target=run_experimentation, args=(selfish_node_selector,))
+    run_experiment_thread= threading.Thread(target=run_experimentation, args=(multi_parameter_gt_node_selector,))
     run_experiment_thread.start()
     
     # Catch Stop Experiment Event from Pod Watcher
