@@ -28,7 +28,7 @@ plt.ylabel('Utilisation CPU (%)')
 plt.title('Évolution de l\'utilisation CPU')
 plt.legend()
 plt.grid(True)
-plt.savefig('results/cpu_usage.png')  # Enregistrer le plot dans le dossier "results"
+plt.savefig('results/cpu_usage.pdf')  # Enregistrer le plot dans le dossier "results"
 plt.close()
 
 # Plot pourcentage d'utilisation de RAM
@@ -41,7 +41,7 @@ plt.ylabel('Utilisation RAM (%)')
 plt.title('Évolution de l\'utilisation RAM')
 plt.legend()
 plt.grid(True)
-plt.savefig('results/ram_usage.png')  # Enregistrer le plot dans le dossier "results"
+plt.savefig('results/ram_usage.pdf')  # Enregistrer le plot dans le dossier "results"
 plt.close()
 
 # Plot pourcentage d'utilisation de stockage
@@ -54,7 +54,7 @@ plt.ylabel('Utilisation Stockage (%)')
 plt.title('Évolution de l\'utilisation de Stockage')
 plt.legend()
 plt.grid(True)
-plt.savefig('results/storage_usage.png')  # Enregistrer le plot dans le dossier "results"
+plt.savefig('results/storage_usage.pdf')  # Enregistrer le plot dans le dossier "results"
 plt.close()
 
 # Calculer la somme normalisée pour chaque nœud
@@ -70,7 +70,7 @@ plt.ylabel('Utilisation totale (%)')
 plt.title('Évolution de l\'utilisation totale')
 plt.legend()
 plt.grid(True)
-plt.savefig('results/total_usage.png')  # Enregistrer le plot dans le dossier "results"
+plt.savefig('results/total_usage.pdf')  # Enregistrer le plot dans le dossier "results"
 plt.close()
 
 
