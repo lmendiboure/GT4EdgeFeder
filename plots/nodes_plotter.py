@@ -23,8 +23,8 @@ plt.figure(figsize=(10, 6))
 for node, group in data.groupby('Node'):
     plt.plot(group['TimeElapsed'], group['CPU'], label=node)
 
-plt.xlabel('Temps (s)')
-plt.ylabel('Utilisation CPU (%)')
+plt.xlabel('Time (s)')
+plt.ylabel('CPU Usage (%)')
 plt.title('Évolution de l\'utilisation CPU')
 plt.legend()
 plt.grid(True)
@@ -36,8 +36,8 @@ plt.figure(figsize=(10, 6))
 for node, group in data.groupby('Node'):
     plt.plot(group['TimeElapsed'], group['RAM'], label=node)
 
-plt.xlabel('Temps (s)')
-plt.ylabel('Utilisation RAM (%)')
+plt.xlabel('Time (s)')
+plt.ylabel('RAM Usage (%)')
 plt.title('Évolution de l\'utilisation RAM')
 plt.legend()
 plt.grid(True)
@@ -49,8 +49,8 @@ plt.figure(figsize=(10, 6))
 for node, group in data.groupby('Node'):
     plt.plot(group['TimeElapsed'], group['Storage'], label=node)
 
-plt.xlabel('Temps (s)')
-plt.ylabel('Utilisation Stockage (%)')
+plt.xlabel('Time (s)')
+plt.ylabel('Storage Usage (%)')
 plt.title('Évolution de l\'utilisation de Stockage')
 plt.legend()
 plt.grid(True)
@@ -65,8 +65,8 @@ plt.figure(figsize=(10, 6))
 for node, group in data.groupby('Node'):
     plt.plot(group['TimeElapsed'], group['Total'], label=node)
 
-plt.xlabel('Temps (s)')
-plt.ylabel('Utilisation totale (%)')
+plt.xlabel('Time (s)')
+plt.ylabel('Total Usage (%)')
 plt.title('Évolution de l\'utilisation totale')
 plt.legend()
 plt.grid(True)
