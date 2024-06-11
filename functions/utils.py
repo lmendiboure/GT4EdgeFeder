@@ -116,9 +116,9 @@ def clean_experiment_files():
     clean_csv(results_file_pods)
     data=["timestamp", "pod_name", "Status", "initial_node", "running_node", "ran_delay", "inter_node_delay"]
     write_to_csv(results_file_pods, data)
-    data=["timestamp", "node_name", "CPU", "RAM", "storage"]
     clean_csv(results_file_nodes)
-
+    data=["timestamp", "node_name", "CPU", "RAM", "storage"]
+    write_to_csv(results_file_nodes, data)
 
 def get_inter_node_delay(config_data,origin_node,destination_node,data):
     """Get the latency associated with the transmission of data between nodes (ie pod transfer)."""

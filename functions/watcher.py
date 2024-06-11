@@ -174,11 +174,6 @@ def watch_nodes():
     """
     config_data = load_config("config.yaml")
     results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
-
-    try:
-        write_to_csv(results_file_nodes, ("Timestamp","Node","CPU","RAM","Storage"))
-    except Exception as e:
-        print(f"Error initialization node logs:", e)
         
     while not stop_event.is_set():
         storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=results_file_nodes)
