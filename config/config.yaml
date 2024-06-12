@@ -11,7 +11,7 @@ reproductible_seed: DrLeoandMrStef # Seeding the PRNG for reproductibility in da
 
 # Configuration for Kubernetes
 namespace: expe
-disk_size: 20000  # Disk size in MB => equally shared between nodes
+disk_size: 200000  # Disk size in MB => equally shared between nodes
 nodes_number: 2  # Number of nodes in the cluster
 memory: 24000 # RAM per node in MB
 cpus: 4  # Number of CPU cores per node
@@ -32,7 +32,7 @@ pods_config:
     storage: 820  # Storage capacity for the nginx pod in MB
     transmission_uplink: 427347 # bits to transmit over RAN (Bits)
     transmission_downlink: 816
-    instructions: 544271527 # Real value : 8807684292 # number of instructions to be done
+    instructions: 54271527 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
     CPU: 450  
@@ -40,7 +40,7 @@ pods_config:
     storage: 2500 
     transmission_uplink: 160097
     transmission_downlink: 9032 
-    instructions: 544271527 # Real value : 100141000000 ; Usually Used
+    instructions: 24271527 # Real value : 100141000000 ; Usually Used
     deadline: 60  
   - name: mrleo-pod
     CPU: 350 
@@ -48,7 +48,7 @@ pods_config:
     storage: 950 
     transmission_uplink: 41000
     transmission_downlink: 41000
-    instructions: 544271527 # Real value : 544271527
+    instructions: 14271527 # Real value : 544271527
     deadline: 33
 #  - name: edgestorage-pod
 #    CPU: 20 
@@ -63,18 +63,18 @@ pods_config:
 nodes_config:
   # Node 1
   - id: minikube
-    CPU_percentage: 0.65
-    RAM_percentage: 0.6
-    storage_percentage: 0.4
+    CPU_percentage: 0.5
+    RAM_percentage: 0.5
+    storage_percentage: 0.5
     connections:
       - target_node: minikube-m02
         latency: 10 # Delay in ms
         bandwidth: 1000000 # Bandwidth in MB per second
   # Node 2
   - id: minikube-m02
-    CPU_percentage: 0.35
-    RAM_percentage: 0.4
-    storage_percentage: 0.6 
+    CPU_percentage: 0.5
+    RAM_percentage: 0.5
+    storage_percentage: 0.5 
     connections:
       - target_node: minikube
         latency: 10 # Delay in ms

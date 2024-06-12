@@ -30,7 +30,8 @@ def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,ap
         pod_ram=pod_config["RAM"]
         pod_storage= pod_config["storage"]
         
-        potential_node= random.choice(available_nodes)
+        #potential_node = random.choice(available_nodes)
+       
 
         # Check if initial node is able to manage this pod
         if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < node_list[initial_node]["cpu_max"] and (node_list[initial_node]["ram_used"] + pod_ram) < node_list[initial_node]["ram_max"] and (node_list[initial_node]["storage_used"] + pod_storage) < node_list[initial_node]["storage_max"]):

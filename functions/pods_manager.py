@@ -83,15 +83,20 @@ def generate_resources(pod_config):
             "limits": {"cpu": f"{cpu}m",  
                        "memory": f"{ram}Mi"}
         }
-    elif pod_config["pod_class"]:
+    elif pod_config["pod_class"] == "burstable":
         return {
             "requests": {"cpu": f"{cpu//2}m",  # Half of limit for burstable
                          "memory": f"{ram//2}Mi"},
             "limits": {"cpu": f"{cpu}m",
                        "memory": f"{ram}Mi"}
         }
-    else:  # Best-effort
-        return {}
+    elif pod_config["pod_class"] == "besteffort":
+        return {
+            "requests": {"cpu": f"{cpu//10}m",  # Tenth of limit for besteffort
+                         "memory": f"{ram//10}Mi"},
+            "limits": {"cpu": f"{cpu}m",
+                       "memory": f"{ram}Mi"}
+        }    
         
         
 def get_pod_spec(config_data,running_node, pod_config):

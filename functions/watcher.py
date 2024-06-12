@@ -113,9 +113,9 @@ def get_cluster_node_usage(api_instance, config_data):
                             total_storage_used += pod_storage_usage
                             if "bu" in pod.metadata.name:
                                 # Kubernetes, allocates a variable amount for burstable between Max/2 and Max
-                                pod_cpu_usage = random.uniform(pod_config['CPU']/2, pod_config['CPU'])
+                                pod_cpu_usage = pod_config['CPU']
                                 total_cpu_used += pod_cpu_usage/1000
-                                pod_ram_usage = random.uniform(pod_config['RAM']/2, pod_config['RAM'])
+                                pod_ram_usage = pod_config['RAM']
                                 total_ram_used += pod_ram_usage    
                             elif "gu" in pod.metadata.name:
                                 pod_cpu_usage = pod_config['CPU']
@@ -124,9 +124,9 @@ def get_cluster_node_usage(api_instance, config_data):
                                 total_ram_used += pod_ram_usage   
                             elif "be" in pod.metadata.name:
                                 # Kubernetes, allocates a variable amount for best effort between Max/4 and Max
-                                pod_cpu_usage = random.uniform(pod_config['CPU']/4, pod_config['CPU'])
+                                pod_cpu_usage = pod_config['CPU']
                                 total_cpu_used += pod_cpu_usage/1000
-                                pod_ram_usage = random.uniform(pod_config['RAM']/4, pod_config['RAM'])
+                                pod_ram_usage = pod_config['RAM']
                                 total_ram_used += pod_ram_usage    
                             
 	    # Store data for each node (With Minikube, load levels can rise to around 105%, so we minimise to display 100 at max.)	

@@ -56,7 +56,7 @@ def compute_pods_number(filename):
     file_path = os.path.join(project_root, "data", filename)
     with open(file_path, 'r') as file:
         lines = file.readlines()
-    return len(lines)    
+    return len(lines)-1    
 
 def convert_memory_usage_to_megabytes(memory_usage_bytes):
     """
