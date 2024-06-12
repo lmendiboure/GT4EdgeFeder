@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import threading
 from functions.watcher import watch_nodes,watch_pods, stop_event
 import time
