@@ -180,11 +180,11 @@ def run_experimentation(node_selection_func):
 	# Add pods corresponding to the current time slot
         if (current_time<=config_data["expe_duration"]):
             new_pods=get_interval_pods_lists(config_data, current_time, current_time+game_interval)
+            # Sort new pods list by priority
+            new_pods_sorted = sorted(new_pods, key=custom_sort_key)
 
+	# Add these pods in the waiting list
         waiting_pods.extend(new_pods)
-        # Sort waiting pods list by priority
-
-        waiting_pods=sorted(waiting_pods, key=custom_sort_key)
 
         if waiting_pods:
             waiting_pods=node_selection_func(waiting_pods, available_nodes,config_data,api_instance)
