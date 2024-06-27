@@ -29,8 +29,9 @@ if __name__ == '__main__':
     print("\nDone.\n")
     print("-> Check that pods are completed properly. Could take a few seconds/minutes if images need to be pulled.\n")	
     warmup_watcher()
+    print("\n-> Delete these pods.\n")
     delete_pods()
-    print("\nDone.\n")
+    print("Done.\n")
     
     # Running new experiment
     print("******Starting new experiment******\n")
