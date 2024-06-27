@@ -82,6 +82,56 @@ def watch_pods():
         print(f"Error watching pods:", e)
 
 
+
+def warmup_watcher():
+    """
+    Watch a specific number of pods. Aims to verify that experimentations can properly work on the considered machine. Also aims to avoid potential network issues at experimentation start.
+    """
+    try: 
+
+        # Load configuration data from the YAML file
+        config_data = load_config("config.yaml")
+        # Get the namespace from the configuration data
+        namespace = config_data['namespace']
+                
+        processed_pods_number = 0
+         	
+        # Load Kubernetes configuration from default location
+        config.load_kube_config()
+        
+        # Create a client to interact with the Kubernetes API
+        api_instance = client.CoreV1Api()
+
+        # Get nodes number
+        nodes = get_available_nodes(api_instance)
+        pods_number = len(nodes)
+
+        # Initialize a watch stream
+        w = watch.Watch()
+
+        # Iterate over events in the watch stream
+        for event in w.stream(api_instance.list_namespaced_pod, namespace=namespace):
+            # Extract pod name and phase from the event
+            pod_name = event['object'].metadata.name
+            pod_phase = event['object'].status.phase
+            running_node = event['object'].spec.node_name  
+            
+            if pod_phase == "Succeeded":
+                print(f"Pod {pod_name} is now Completed on node {running_node}.")
+                processed_pods_number+=1
+                if processed_pods_number==pods_number:
+                    break
+            
+            # So far only get the info for failed pods.         
+            elif pod_phase == "Failed": 
+                print(f"Pod {pod_name} has Failed on node {running_node}.")
+                raise Exception("Error while running warm up phase. Please try again.")
+    
+    except Exception as e:
+        # Handle any exceptions and print error message
+        print(f"Error watching pods:", e)
+
+
 def get_cluster_node_usage(api_instance, config_data):
     """Get the ephemeral storage usage for all nodes in the Kubernetes cluster."""
     try:

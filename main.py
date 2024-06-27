@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
 import threading
-from functions.watcher import watch_nodes,watch_pods, stop_event
+from functions.watcher import watch_nodes,watch_pods, stop_event, warmup_watcher
 import time
 from functions.utils import delete_pods, clean_experiment_files, load_config
 from functions.nodes_manager import multi_parameter_gt_node_selector, cpu_gt_node_selector, dynamic_selfish_node_selector, selfish_node_selector, run_experimentation
+from functions.warmup import launch_warmup_pods_on_all_nodes
 import random
 import sys
 
 if __name__ == '__main__':
 
+    config_data = load_config("config.yaml")
+    
     # Clean environment
     print("******Cleaning previous experiments******\n")	
-    
     print("-> Deleting pods remaining from previous experiment (if any)\n")	
     delete_pods()
     print("Done.\n")
@@ -20,11 +22,21 @@ if __name__ == '__main__':
     clean_experiment_files()
     print("Done.\n")
     
+    # Running warmup phase
+    print("******Warm Up Phase******\n")	
+    print("-> Initiating a pod on each node\n")	
+    launch_warmup_pods_on_all_nodes(config_data['namespace'])
+    print("\nDone.\n")
+    print("-> Check that pods are completed properly. Could take a few seconds/minutes if images need to be pulled.\n")	
+    warmup_watcher()
+    delete_pods()
+    print("\nDone.\n")
+    
     # Running new experiment
     print("******Starting new experiment******\n")
 
     # Initialize randomness sequences
-    config_data = load_config("config.yaml")
+ 
     random.seed(config_data["reproductible_seed"]) # Initialize PRNG for reproductibility purposes
     
     # Run a thread measuring every second nodes nodes stats

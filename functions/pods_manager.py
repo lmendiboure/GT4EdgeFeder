@@ -151,7 +151,7 @@ def get_pod_spec(config_data,running_node, pod_config):
     
     return spec    
 
-# Function to launch a pod on a random node 
+# Function to launch a pod based on its specifications 
 def launch_pod(config_data,running_node, pod_config, api_instance):
     
     # Define pod specification
