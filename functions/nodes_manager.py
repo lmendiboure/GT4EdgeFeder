@@ -1,6 +1,6 @@
 import random
 import time    
-from functions.watcher import get_nodes_utilization, stop_event
+from functions.watcher import get_nodes_utilization
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset, get_inter_node_delay, get_available_nodes, get_node_resources_infos, order_nodes_by_delay     
 from functions.pods_manager import get_pod_config, launch_pod, get_interval_pods_lists 
 from kubernetes import client, config, watch
@@ -155,7 +155,7 @@ def custom_sort_key(item):
     return priority[item[3]]
 
 # Function to run experimentation based on a predetermined set of pods
-def run_experimentation(node_selection_func):
+def run_experimentation(node_selection_func,stop_event):
 
     config_data = load_config("config.yaml")
     

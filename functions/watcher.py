@@ -6,11 +6,8 @@ from functions.utils import load_config, convert_memory_usage_to_megabytes, pars
 import random
 import threading
 
-    
-stop_event= threading.Event()
 
-
-def watch_pods():
+def watch_pods(stop_event):
     """
     Watch pods in a specified namespace and log their phase transitions to a CSV file. Sends a "Stop Experiment" event when all pods have been processed (ie. number of pods completed is equal to the number of pods in the experiment file.
     """
@@ -66,6 +63,7 @@ def watch_pods():
                 write_to_csv(results_file_pods, [timestamp, pod_name, "Succeeded", running_node, initial_node, transmission_delay, inter_node_delay])
                 processed_pods_number+=1
                 if processed_pods_number==expe_pods_number:
+                    processed_pods_number = 0
                     stop_event.set()
                     break
             # So far only get the info for failed pods.         
@@ -74,6 +72,7 @@ def watch_pods():
                 write_to_csv(results_file_pods, [timestamp, pod_name, "Failed", running_node, initial_node, transmission_delay, inter_node_delay])
                 processed_pods_number+=1
                 if processed_pods_number==expe_pods_number:
+                    processed_pods_number = 0
                     stop_event.set()
                     break
     
@@ -218,7 +217,7 @@ def get_nodes_utilization(config_data,output_file=None):
 
     
     
-def watch_nodes():
+def watch_nodes(stop_event):
     """
     Get nodes data for a specific namespace.Complete data result file every second.
     """

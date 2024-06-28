@@ -6,6 +6,31 @@ from math import ceil
 from kubernetes import client, config, watch
 from datetime import datetime
 
+
+def rename_results_files(experiment_number):
+    """Rename all result files to include the experiment number."""
+    
+    # Load configuration data from the YAML file
+    config_data = load_config("config.yaml")
+    
+    # Get experiment files from the configuration data
+    
+    results_file_pods = config_data.get('results_file_pods', 'data.csv')
+    results_file_nodes = config_data.get('results_file_nodes', 'data.csv')
+    
+    basep, extp = os.path.splitext(results_file_pods) 
+    
+    new_pods_file= f"{basep}_experiment_{experiment_number}{extp}"
+    
+    
+    basen, extn = os.path.splitext(results_file_nodes) 
+    
+    new_nodes_file= f"{basen}_experiment_{experiment_number}{extn}"
+    
+    os.rename(results_file_pods, new_pods_file)
+    
+    os.rename(results_file_nodes, new_nodes_file)  
+
 def load_config(filename):
     """
     Load configuration from YAML file.
