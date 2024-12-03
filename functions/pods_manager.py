@@ -99,7 +99,7 @@ def generate_resources(pod_config):
         }    
         
         
-def get_pod_spec(config_data,running_node, pod_config):
+def get_pod_spec(config_data,running_node, pod_config,arrival_time):
     """
     Generate the specification for the pod.
 
@@ -129,7 +129,8 @@ def get_pod_spec(config_data,running_node, pod_config):
             "annotations": {
                 "transmission_delay": str(pod_config["pod_ran_delay"]),
                 "initial_node": pod_config["initial_node"],
-                "inter_node_delay" : str(inter_node_delay)
+                "inter_node_delay" : str(inter_node_delay),
+                "arrival_time": str(arrival_time)
             }
         },
         "spec": {
@@ -152,10 +153,9 @@ def get_pod_spec(config_data,running_node, pod_config):
     return spec    
 
 # Function to launch a pod based on its specifications 
-def launch_pod(config_data,running_node, pod_config, api_instance):
-    
+def launch_pod(config_data,running_node, pod_config, api_instance,arrival_time):
     # Define pod specification
-    pod_manifest = get_pod_spec(config_data,running_node, pod_config)
+    pod_manifest = get_pod_spec(config_data,running_node, pod_config,arrival_time)
     
     # Create the pod
     api_instance.create_namespaced_pod(namespace=pod_config["namespace"], body=pod_manifest)

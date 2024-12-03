@@ -187,13 +187,12 @@ def order_nodes_by_delay(config_data, nodes, initial_node, data, podtype, podcla
 
     updated_list = {}
     
-    # Depending on the solution chose, the initial node should or should not ge considered
+    # Depending on the solution chose, the initial node should or should not ge considered (considered in our federation vision). 
     if not include_initial_node:
         for node_name in nodes.keys():
             if node_name !=initial_node:
                 updated_list[node_name]=nodes[node_name] 
        
-        print (updated_list)    
     else:
         updated_list=nodes    
         

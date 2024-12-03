@@ -61,7 +61,7 @@ if __name__ == '__main__':
         pods_watcher_thread.start()
     
         # Run experiment
-        run_experiment_thread= threading.Thread(target=run_experimentation, args=(multi_parameter_cooperative_node_selector,stop_event,))
+        run_experiment_thread= threading.Thread(target=run_experimentation, args=(multi_parameter_partial_selfish_node_selector,stop_event,))
         run_experiment_thread.start()
     
         # Catch Stop Experiment Event from Pod Watcher

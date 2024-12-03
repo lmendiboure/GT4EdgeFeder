@@ -2,19 +2,19 @@
 
 # Configuration of experimentation
 
-expe_duration: 30 # Duration of the experimentation in seconds
+expe_duration: 20 # Duration of the experimentation in seconds
 pods_interval: 1 # Average time to wait between the generation of pods
-min_number_per_interval: 4 # Lowest number of pods that can be generated for a given pods_interval
-max_number_per_interval: 12 # Highest number of pods that can be generated for a given pods_interval
+min_number_per_interval: 2 # Lowest number of pods that can be generated for a given pods_interval
+max_number_per_interval: 6 # Highest number of pods that can be generated for a given pods_interval
 game_interval: 0.5 # Average time to wait between two games
 reproductible_seed: DrLeoandMrStef # Seeding the PRNG for reproductibility in datasets and nodes/pods attributions
 
 # Configuration for Kubernetes
 namespace: expe
 disk_size: 200000  # Disk size in MB => equally shared between nodes
-nodes_number: 3  # Number of nodes in the cluster
+nodes_number: 2  # Number of nodes in the cluster
 memory: 24000 # RAM per node in MB
-cpus: 8  # Number of CPU cores per node
+cpus: 4  # Number of CPU cores per node
 
 # Configuration for experimentations results
 
@@ -63,10 +63,10 @@ pods_config:
 nodes_config:
   # Node 1
   - id: minikube
-    CPU_percentage: 0.33
-    RAM_percentage: 0.33
-    storage_percentage: 0.33
-    selfish-ratio: 0.6
+    CPU_percentage: 0.5
+    RAM_percentage: 0.5
+    storage_percentage: 0.5
+    selfish-ratio: 0.5
     average-processing-delay:
       - pod-name: aeneas-pod
         bu: 6470
@@ -84,15 +84,12 @@ nodes_config:
       - target_node: minikube-m02
         latency: 10 # Delay in ms
         bandwidth: 1000000 # Bandwidth in MB per second
-      - target_node: minikube-m03
-        latency: 10 # Delay in ms
-        bandwidth: 1000000 # Bandwidth in MB per second
   # Node 2
   - id: minikube-m02
-    CPU_percentage: 0.33
-    RAM_percentage: 0.33
-    storage_percentage: 0.33
-    selfish-ratio: 0.6
+    CPU_percentage: 0.5
+    RAM_percentage: 0.5
+    selfish-ratio: 0.7
+    storage_percentage: 0.5
     average-processing-delay:
       - pod-name: aeneas-pod
         bu: 7050
@@ -108,34 +105,6 @@ nodes_config:
         be: 5210
     connections:
       - target_node: minikube
-        latency: 10 # Delay in ms
-        bandwidth: 1000000 # Bandwidth in MB per second
-      - target_node: minikube-m03
-        latency: 10 # Delay in ms
-        bandwidth: 1000000 # Bandwidth in MB per second
-  - id: minikube-m03
-    CPU_percentage: 0.33
-    RAM_percentage: 0.33
-    storage_percentage: 0.33
-    selfish-ratio: 0.6
-    average-processing-delay:
-      - pod-name: aeneas-pod
-        bu: 7090
-        gu: 8100
-        be: 8680
-      - pod-name: julius-pod
-        bu: 5900
-        gu: 5700
-        be: 5900
-      - pod-name: mrleo-pod
-        bu: 5700 
-        gu: 5300
-        be: 5290
-    connections:
-      - target_node: minikube
-        latency: 10 # Delay in ms
-        bandwidth: 1000000 # Bandwidth in MB per second
-      - target_node: minikube-m02
         latency: 10 # Delay in ms
         bandwidth: 1000000 # Bandwidth in MB per second
   # Node X

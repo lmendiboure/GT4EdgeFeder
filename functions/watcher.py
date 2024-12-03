@@ -5,6 +5,7 @@ from datetime import datetime
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, compute_pods_number, get_available_nodes, get_node_resources_infos
 import random
 import threading
+from datetime import datetime
 
 
 def watch_pods(stop_event):
@@ -43,6 +44,8 @@ def watch_pods(stop_event):
             transmission_delay = event['object'].metadata.annotations['transmission_delay']
             initial_node = event['object'].metadata.annotations['initial_node']
             inter_node_delay = event['object'].metadata.annotations['inter_node_delay']
+        
+            arrival_time = event['object'].metadata.annotations['arrival_time']
             
             # Get current timestamp with milliseconds
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -50,17 +53,20 @@ def watch_pods(stop_event):
             # Check the phase of the pod and take appropriate action
             if pod_phase == "Pending":
                 print(f"Pod {pod_name} is now Pending.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", running_node, initial_node, transmission_delay, inter_node_delay])
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", running_node, initial_node, transmission_delay, inter_node_delay,""])
 
             elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
                 print(f"Pod {pod_name} is now Running on Node {running_node}. Transmission delay is equal to {transmission_delay}. Inter node delay is equal to {inter_node_delay}")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", running_node, initial_node, transmission_delay, inter_node_delay])
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", running_node, initial_node, transmission_delay, inter_node_delay,""])
 		
             elif pod_phase == "Succeeded":
                 print(f"Pod {pod_name} is now Completed.")
                 # Write timestamp, pod name, and phase to the CSV file
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Succeeded", running_node, initial_node, transmission_delay, inter_node_delay])
+                current_timestamp = datetime.now().isoformat()
+                # Value specifically used for succeeded status: E2E time
+                elapsed_time = int((datetime.fromisoformat(current_timestamp) - datetime.fromisoformat(arrival_time)).total_seconds() * 1000)  # Convert to milliseconds
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Succeeded", running_node, initial_node, transmission_delay, inter_node_delay,elapsed_time])
                 processed_pods_number+=1
                 if processed_pods_number==expe_pods_number:
                     processed_pods_number = 0
@@ -69,7 +75,7 @@ def watch_pods(stop_event):
             # So far only get the info for failed pods.         
             elif pod_phase == "Failed": 
                 print(f"Pod {pod_name} has Failed.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Failed", running_node, initial_node, transmission_delay, inter_node_delay])
+                write_to_csv(results_file_pods, [timestamp, pod_name, "Failed", running_node, initial_node, transmission_delay, inter_node_delay,""])
                 processed_pods_number+=1
                 if processed_pods_number==expe_pods_number:
                     processed_pods_number = 0

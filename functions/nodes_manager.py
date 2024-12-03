@@ -4,6 +4,8 @@ from functions.watcher import get_nodes_utilization
 from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset, get_inter_node_delay, get_available_nodes, get_node_resources_infos, order_nodes_by_delay, get_processing_delay, get_selfish_ratio     
 from functions.pods_manager import get_pod_config, launch_pod, get_interval_pods_lists 
 from kubernetes import client, config, watch
+from datetime import datetime
+
 import os   
 
  
@@ -28,6 +30,7 @@ def multi_parameter_cooperative_node_selector(waiting_pods,available_nodes,confi
         pod_cpu=pod_config["CPU"]
         pod_ram=pod_config["RAM"]
         pod_storage= pod_config["storage"]
+        pod_arrival_time = pod[6]
 
         # Check which node is the most appropriate based on the game and place the pod
         for potential_node in order_nodes_by_delay(config_data, node_list, initial_node, pod_config["pod_transmission_data"],pod[2],pod_config["pod_class"]):
@@ -36,7 +39,7 @@ def multi_parameter_cooperative_node_selector(waiting_pods,available_nodes,confi
                 node_list[potential_node]["ram_used"] += pod_ram
                 node_list[potential_node]["storage_used"] += pod_storage
                 running_node = potential_node
-                launch_pod(config_data,running_node, pod_config, api_instance)
+                launch_pod(config_data,running_node, pod_config, api_instance,pod_arrival_time)
                 waiting_pods.remove(pod) 
                 break
          
@@ -64,7 +67,7 @@ def multi_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,c
         pod_cpu=pod_config["CPU"]
         pod_ram=pod_config["RAM"]
         pod_storage= pod_config["storage"]
-
+        pod_arrival_time = pod[6]
         # Check if initial node is able to manage this pod base on its selfish ratio
         
         if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["cpu_max"]) and (node_list[initial_node]["ram_used"] + pod_ram) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["ram_max"]) and (node_list[initial_node]["storage_used"] + pod_storage) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["storage_max"])):
@@ -73,7 +76,7 @@ def multi_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,c
             node_list[initial_node]["ram_used"] += pod_ram
             node_list[initial_node]["storage_used"] += pod_storage
             running_node = initial_node
-            launch_pod(config_data,running_node, pod_config, api_instance)
+            launch_pod(config_data,running_node, pod_config, api_instance,pod_arrival_time)
             waiting_pods.remove(pod)        
             
         # Else check if other nodes are able to manage this pod 
@@ -85,7 +88,7 @@ def multi_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,c
                     node_list[dest_node]["ram_used"] += pod_ram
                     node_list[dest_node]["storage_used"] += pod_storage
                     running_node = dest_node
-                    launch_pod(config_data,running_node, pod_config, api_instance)
+                    launch_pod(config_data,running_node, pod_config, api_instance,pod_arrival_time)
                     waiting_pods.remove(pod) 
                     break
          
@@ -111,14 +114,14 @@ def mono_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,co
         pod_cpu=pod_config["CPU"]
         pod_ram=pod_config["RAM"]
         pod_storage= pod_config["storage"]
-
+        pod_arrival_time = pod[6]
         # Check if initial node is able to manage this pod base on its selfish ratio
         
         if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["cpu_max"])):
             
             node_list[initial_node]["cpu_used"] += pod_cpu/1000
             running_node = initial_node
-            launch_pod(config_data,running_node, pod_config, api_instance)
+            launch_pod(config_data,running_node, pod_config, api_instance,pod_arrival_time)
             waiting_pods.remove(pod)        
             
         # Else check if other nodes are able to manage this pod depending on their own selfishness
@@ -128,7 +131,7 @@ def mono_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,co
                 if ((node_list[dest_node]["cpu_used"] + pod_cpu/1000) < (1-node_list[dest_node]["selfish_ratio"])*node_list[dest_node]["cpu_max"]):
                     node_list[dest_node]["cpu_used"] += pod_cpu/1000
                     running_node = dest_node
-                    launch_pod(config_data,running_node, pod_config, api_instance)
+                    launch_pod(config_data,running_node, pod_config, api_instance,pod_arrival_time)
                     waiting_pods.remove(pod) 
                     break
          
@@ -167,6 +170,9 @@ def run_experimentation(node_selection_func,stop_event):
         if (current_time<=config_data["expe_duration"]):
             new_pods=get_interval_pods_lists(config_data, current_time, current_time+game_interval)
             # Sort new pods list by priority
+            for pod in new_pods:
+                current_timestamp = datetime.now().isoformat()
+                pod.append(current_timestamp)
             new_pods_sorted = sorted(new_pods, key=custom_sort_key)
 
 	# Add these pods in the waiting list
