@@ -110,7 +110,7 @@ def calculate_time_difference(file_path):
                         avg_end_to_end_time = total_end_to_end_times[category][pod_type][running_node_name] / count_pending[category][pod_type][running_node_name]
                         print(f"Average Time difference (End-to-end) - {avg_end_to_end_time} milliseconds\n")
 # Example usage
-calculate_time_difference("./results/data_pods.csv")
+calculate_time_difference("./results/data_pods_experiment_1.csv")
 
 
 

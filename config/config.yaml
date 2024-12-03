@@ -2,10 +2,10 @@
 
 # Configuration of experimentation
 
-expe_duration: 1 # Duration of the experimentation in seconds
+expe_duration: 20 # Duration of the experimentation in seconds
 pods_interval: 1 # Average time to wait between the generation of pods
-min_number_per_interval: 1 # Lowest number of pods that can be generated for a given pods_interval
-max_number_per_interval: 2 # Highest number of pods that can be generated for a given pods_interval
+min_number_per_interval: 2 # Lowest number of pods that can be generated for a given pods_interval
+max_number_per_interval: 6 # Highest number of pods that can be generated for a given pods_interval
 game_interval: 0.5 # Average time to wait between two games
 reproductible_seed: DrLeoandMrStef # Seeding the PRNG for reproductibility in datasets and nodes/pods attributions
 
@@ -66,6 +66,20 @@ nodes_config:
     CPU_percentage: 0.5
     RAM_percentage: 0.5
     storage_percentage: 0.5
+    selfish-ratio: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 6470
+        gu: 7870
+        be: 8410
+      - pod-name: julius-pod
+        bu: 5980
+        gu: 5600
+        be: 5500
+      - pod-name: mrleo-pod
+        bu: 5400
+        gu: 5600
+        be: 5380
     connections:
       - target_node: minikube-m02
         latency: 10 # Delay in ms
@@ -74,7 +88,21 @@ nodes_config:
   - id: minikube-m02
     CPU_percentage: 0.5
     RAM_percentage: 0.5
-    storage_percentage: 0.5 
+    selfish-ratio: 0.7
+    storage_percentage: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 7050
+        gu: 8200
+        be: 8610
+      - pod-name: julius-pod
+        bu: 6200
+        gu: 5800
+        be: 6000
+      - pod-name: mrleo-pod
+        bu: 5800 
+        gu: 5400
+        be: 5210
     connections:
       - target_node: minikube
         latency: 10 # Delay in ms

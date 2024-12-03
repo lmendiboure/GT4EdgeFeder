@@ -4,7 +4,7 @@ import threading
 from functions.watcher import watch_nodes,watch_pods, warmup_watcher
 import time
 from functions.utils import delete_pods, clean_experiment_files, load_config, rename_results_files
-from functions.nodes_manager import multi_parameter_gt_node_selector, cpu_gt_node_selector, dynamic_selfish_node_selector, selfish_node_selector, run_experimentation
+from functions.nodes_manager import multi_parameter_cooperative_node_selector, multi_parameter_partial_selfish_node_selector, mono_parameter_partial_selfish_node_selector, run_experimentation
 from functions.warmup import launch_warmup_pods_on_all_nodes
 import random
 import sys
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         pods_watcher_thread.start()
     
         # Run experiment
-        run_experiment_thread= threading.Thread(target=run_experimentation, args=(multi_parameter_gt_node_selector,stop_event,))
+        run_experiment_thread= threading.Thread(target=run_experimentation, args=(multi_parameter_cooperative_node_selector,stop_event,))
         run_experiment_thread.start()
     
         # Catch Stop Experiment Event from Pod Watcher

@@ -1,15 +1,14 @@
 import random
 import time    
 from functions.watcher import get_nodes_utilization
-from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset, get_inter_node_delay, get_available_nodes, get_node_resources_infos, order_nodes_by_delay     
+from functions.utils import load_config, convert_memory_usage_to_megabytes, parse_memory_string, write_to_csv, load_dataset, get_inter_node_delay, get_available_nodes, get_node_resources_infos, order_nodes_by_delay, get_processing_delay, get_selfish_ratio     
 from functions.pods_manager import get_pod_config, launch_pod, get_interval_pods_lists 
 from kubernetes import client, config, watch
 import os   
 
-    	
-
-# Reproduces Multi-Parameter Game Theory Node selection 
-def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,api_instance):
+ 
+ # Reproduces the proposed solution with a multi-parameter approach (RAM, CPU, Storage). 
+def multi_parameter_cooperative_node_selector(waiting_pods,available_nodes,config_data,api_instance):
     storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=None)
     node_list = {node: {} for node in available_nodes}
 
@@ -22,19 +21,53 @@ def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,ap
         node_list[node]["ram_max"] = max_ram
         node_list[node]["storage_used"] = storage_data.get(node, 0)/100 * max_storage
         node_list[node]["storage_max"] = max_storage
-    
+
     for pod in waiting_pods:
         pod_config = get_pod_config(config_data,pod)
         initial_node= pod_config["initial_node"]
         pod_cpu=pod_config["CPU"]
         pod_ram=pod_config["RAM"]
         pod_storage= pod_config["storage"]
-        
-        #potential_node = random.choice(available_nodes)
-       
 
-        # Check if initial node is able to manage this pod
-        if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < node_list[initial_node]["cpu_max"] and (node_list[initial_node]["ram_used"] + pod_ram) < node_list[initial_node]["ram_max"] and (node_list[initial_node]["storage_used"] + pod_storage) < node_list[initial_node]["storage_max"]):
+        # Check which node is the most appropriate based on the game and place the pod
+        for potential_node in order_nodes_by_delay(config_data, node_list, initial_node, pod_config["pod_transmission_data"],pod[2],pod_config["pod_class"]):
+            if ((node_list[potential_node]["cpu_used"] + pod_cpu/1000) < node_list[potential_node]["cpu_max"] and (node_list[potential_node]["ram_used"] + pod_ram) < node_list[potential_node]["ram_max"] and (node_list[potential_node]["storage_used"] + pod_storage) < node_list[potential_node]["storage_max"]):
+                node_list[potential_node]["cpu_used"] += pod_cpu/1000
+                node_list[potential_node]["ram_used"] += pod_ram
+                node_list[potential_node]["storage_used"] += pod_storage
+                running_node = potential_node
+                launch_pod(config_data,running_node, pod_config, api_instance)
+                waiting_pods.remove(pod) 
+                break
+         
+    return waiting_pods
+    	
+
+# Reproduces the competitor solution with a multi-parameter approach (RAM, CPU, Storage). 
+def multi_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,config_data,api_instance):
+    storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=None)
+    node_list = {node: {} for node in available_nodes}
+
+    # Initialize nodes infos: maximum load that can be achieved and current load
+    for index, node in enumerate(available_nodes):
+        max_cpu, max_ram, max_storage = get_node_resources_infos(config_data, index)
+        node_list[node]["cpu_used"]= cpu_data.get(node, 0)/100*max_cpu
+        node_list[node]["cpu_max"] = max_cpu
+        node_list[node]["ram_used"] = ram_data.get(node, 0)/100 * max_ram
+        node_list[node]["ram_max"] = max_ram
+        node_list[node]["storage_used"] = storage_data.get(node, 0)/100 * max_storage
+        node_list[node]["storage_max"] = max_storage
+        node_list[node]["selfish_ratio"] = get_selfish_ratio(config_data,node)
+    for pod in waiting_pods:
+        pod_config = get_pod_config(config_data,pod)
+        initial_node= pod_config["initial_node"]
+        pod_cpu=pod_config["CPU"]
+        pod_ram=pod_config["RAM"]
+        pod_storage= pod_config["storage"]
+
+        # Check if initial node is able to manage this pod base on its selfish ratio
+        
+        if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["cpu_max"]) and (node_list[initial_node]["ram_used"] + pod_ram) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["ram_max"]) and (node_list[initial_node]["storage_used"] + pod_storage) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["storage_max"])):
             
             node_list[initial_node]["cpu_used"] += pod_cpu/1000
             node_list[initial_node]["ram_used"] += pod_ram
@@ -43,11 +76,11 @@ def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,ap
             launch_pod(config_data,running_node, pod_config, api_instance)
             waiting_pods.remove(pod)        
             
-        # Check if other nodes are able to manage this pod 
-           
+        # Else check if other nodes are able to manage this pod 
+        
         else:
-            for dest_node in order_nodes_by_delay(config_data,initial_node):
-                if ((node_list[dest_node]["cpu_used"] + pod_cpu/1000) < node_list[dest_node]["cpu_max"] and (node_list[dest_node]["ram_used"] + pod_ram) < node_list[dest_node]["ram_max"] and (node_list[dest_node]["storage_used"] + pod_storage) < node_list[dest_node]["storage_max"]):
+            for dest_node in order_nodes_by_delay(config_data, node_list, initial_node, pod_config["pod_transmission_data"],pod[2],pod_config["pod_class"], include_initial_node=False):
+                if ((node_list[dest_node]["cpu_used"] + pod_cpu/1000) < (1-node_list[dest_node]["selfish_ratio"]) *node_list[dest_node]["cpu_max"] and (node_list[dest_node]["ram_used"] + pod_ram) < (1-node_list[dest_node]["selfish_ratio"]) *node_list[dest_node]["ram_max"] and (node_list[dest_node]["storage_used"] + pod_storage) < (1-node_list[dest_node]["selfish_ratio"]) *node_list[dest_node]["storage_max"]):
                     node_list[dest_node]["cpu_used"] += pod_cpu/1000
                     node_list[dest_node]["ram_used"] += pod_ram
                     node_list[dest_node]["storage_used"] += pod_storage
@@ -58,94 +91,47 @@ def multi_parameter_gt_node_selector(waiting_pods,available_nodes,config_data,ap
          
     return waiting_pods
     
-# Reproduces CPU Based Game Theory Node selection 
-def cpu_gt_node_selector(available_nodes):
+# Reproduces the operation of the competitor solution with a single parameter: CPU
+
+def mono_parameter_partial_selfish_node_selector(waiting_pods,available_nodes,config_data,api_instance):
     storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=None)
     node_list = {node: {} for node in available_nodes}
 
     # Initialize nodes infos: maximum load that can be achieved and current load
     for index, node in enumerate(available_nodes):
         max_cpu, max_ram, max_storage = get_node_resources_infos(config_data, index)
-        node_list[node]["cpu_used"]= cpu_data.get(node, 0)*max_cpu
+        node_list[node]["cpu_used"]= cpu_data.get(node, 0)/100*max_cpu
         node_list[node]["cpu_max"] = max_cpu
-    
-    for pod in waiting_pods:
-        pod_config = get_pod_config(config_data,pod)
-        initial_node= pod_config["initial_node"]
-        pod_cpu=pod_config["CPU"]
-        
-        # Check if initial node is able to manage this pod
-        if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < node_list[initial_node]["cpu_max"]):
-            node_list[initial_node]["cpu_used"] += pod_cpu/1000
-            node_list[initial_node]["ram_used"] += pod_ram
-            node_list[initial_node]["storage_used"] += pod_storage
-            running_node = initial_node
-            launch_pod(config_data,running_node, pod_config, api_instance)
-            waiting_pods.remove(pod)        
-            
-        # Check if other pods are able to manage this pod 
-           
-        else:
-            for dest_node in order_nodes_by_delay(config_data,initial_node):
-                if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < node_list[initial_node]["cpu_max"]):
-                    node_list[initial_node]["cpu_used"] += pod_cpu/1000
-                    node_list[initial_node]["ram_used"] += pod_ram
-                    node_list[initial_node]["storage_used"] += pod_storage
-                    running_node = initial_node
-                    launch_pod(config_data,running_node, pod_config, api_instance)
-                    waiting_pods.remove(pod) 
-                    break
-         
-    return waiting_pods
-
-
-
-# Dynamic Selfish node selection => Services are placed only if resources are sufficient
-
-def dynamic_selfish_node_selector(waiting_pods,available_nodes,config_data,api_instance):
-
-    storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=None)
-    node_list = {node: {} for node in available_nodes}
-
-    # Initialize nodes infos: maximum load that can be achieved and current load
-    for index, node in enumerate(available_nodes):
-        max_cpu, max_ram, max_storage = get_node_resources_infos(config_data, index)
-        node_list[node]["cpu_used"]= cpu_data.get(node, 0)*max_cpu
-        node_list[node]["cpu_max"] = max_cpu
-        node_list[node]["ram_used"] = ram_data.get(node, 0) * max_ram
-        node_list[node]["ram_max"] = max_ram
-        node_list[node]["storage_used"] = storage_data.get(node, 0) * max_storage
+        node_list[node]["storage_used"] = storage_data.get(node, 0)/100 * max_storage
         node_list[node]["storage_max"] = max_storage
-    
+        node_list[node]["selfish_ratio"] = get_selfish_ratio(config_data,node)
     for pod in waiting_pods:
         pod_config = get_pod_config(config_data,pod)
         initial_node= pod_config["initial_node"]
         pod_cpu=pod_config["CPU"]
         pod_ram=pod_config["RAM"]
         pod_storage= pod_config["storage"]
+
+        # Check if initial node is able to manage this pod base on its selfish ratio
         
-        
-        # Check if initial node is able to manage this pod
-        if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < node_list[initial_node]["cpu_max"] and (node_list[initial_node]["ram_used"] + pod_ram) < node_list[initial_node]["ram_max"] and (node_list[initial_node]["storage_used"] + pod_storage) < node_list[initial_node]["storage_max"]):
+        if ((node_list[initial_node]["cpu_used"] + pod_cpu/1000) < (node_list[initial_node]["selfish_ratio"] * node_list[initial_node]["cpu_max"])):
+            
             node_list[initial_node]["cpu_used"] += pod_cpu/1000
-            node_list[initial_node]["ram_used"] += pod_ram
-            node_list[initial_node]["storage_used"] += pod_storage
             running_node = initial_node
             launch_pod(config_data,running_node, pod_config, api_instance)
             waiting_pods.remove(pod)        
+            
+        # Else check if other nodes are able to manage this pod depending on their own selfishness
+        
+        else:
+            for dest_node in order_nodes_by_delay(config_data, node_list, initial_node, pod_config["pod_transmission_data"],pod[2],pod_config["pod_class"], include_initial_node=False):
+                if ((node_list[dest_node]["cpu_used"] + pod_cpu/1000) < (1-node_list[dest_node]["selfish_ratio"])*node_list[dest_node]["cpu_max"]):
+                    node_list[dest_node]["cpu_used"] += pod_cpu/1000
+                    running_node = dest_node
+                    launch_pod(config_data,running_node, pod_config, api_instance)
+                    waiting_pods.remove(pod) 
+                    break
          
-    return waiting_pods
-
-
-# Selfish node selection => Opposite to a Federation process: Tasks are not exchanged between nodes
-def selfish_node_selector(waiting_pods,available_nodes,config_data,api_instance):
-
-    for pod in waiting_pods:
-        pod_config = get_pod_config(config_data,pod)
-        initial_node= pod_config["initial_node"]
-        launch_pod(config_data,initial_node, pod_config, api_instance)
-        waiting_pods.remove(pod)
-
     return waiting_pods
 
 

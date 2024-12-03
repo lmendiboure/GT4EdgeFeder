@@ -145,6 +145,29 @@ def clean_experiment_files():
     data=["timestamp", "node_name", "CPU", "RAM", "storage"]
     write_to_csv(results_file_nodes, data)
 
+def get_selfish_ratio(config_data,nodename):
+    """Get the percentage of the resources of the node that will only be used by this node and will not be used by the federation."""
+    selfish_ratio=0
+    # Find node in config_data
+    for node in config_data["nodes_config"]:
+        if node["id"] == nodename:
+            selfish_ratio = node["selfish-ratio"]
+    return selfish_ratio
+    
+
+def get_processing_delay(config_data,nodename,podtype,podclass):
+    """Get the latency associated with the processing of a pod on a given node (ie pod processing time)."""
+    delay=0
+    # Find node in config_data
+    for node in config_data["nodes_config"]:
+        if node["id"] == nodename:
+            # Find corresponding application
+            for application in node["average-processing-delay"]:
+                if application["pod-name"] == podtype:
+                    # Sum latency + time to transmit data (uplink + downlink)
+                    delay = application[podclass[:2]]
+    return delay
+
 def get_inter_node_delay(config_data,origin_node,destination_node,data):
     """Get the latency associated with the transmission of data between nodes (ie pod transfer)."""
     delay=0
@@ -157,6 +180,32 @@ def get_inter_node_delay(config_data,origin_node,destination_node,data):
                     # Sum latency + time to transmit data (uplink + downlink)
                     delay = ceil(connection["latency"] + data/connection["bandwidth"])
     return delay
+
+def order_nodes_by_delay(config_data, nodes, initial_node, data, podtype, podclass, include_initial_node=True):
+
+    """Get the list of nodes that can manage a given pod with an ordering based on the processing delay of each node."""
+
+    updated_list = {}
+    
+    # Depending on the solution chose, the initial node should or should not ge considered
+    if not include_initial_node:
+        for node_name in nodes.keys():
+            if node_name !=initial_node:
+                updated_list[node_name]=nodes[node_name] 
+       
+        print (updated_list)    
+    else:
+        updated_list=nodes    
+        
+    for node_name in updated_list.keys():
+        updated_list[node_name]["delay"] = get_processing_delay(config_data,node_name,podtype,podclass)
+        if node_name != initial_node:
+            updated_list[node_name]["delay"]+= get_inter_node_delay(config_data,initial_node, node_name,data)
+    
+    
+    sorted_nodes = sorted(updated_list.keys(), key=lambda key: updated_list[key]['delay'])  
+
+    return sorted_nodes
     
 def parse_memory_string(memory_string):
     """
@@ -203,16 +252,6 @@ def get_node_resources_infos(config_data, index):
     
     return node_cpu, node_ram, node_storage
   
-def order_nodes_by_delay(config_data, initial_node):
-    
-    node = next((n for n in config_data["nodes_config"] if n['id'] == initial_node), None)  
-    
-    if not node:
-        return []
-    
-    sorted_connections= sorted(node['connections'], key=lambda x: x['latency'])
-    
-    return [connection['target_node'] for connection in sorted_connections]
 
 def delete_pods():
     """

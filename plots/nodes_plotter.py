@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Lire les données à partir du fichier CSV
-data = pd.read_csv('./results/data_nodes.csv', names=['Timestamp', 'Node', 'CPU', 'RAM', 'Storage'], skiprows=1)
+data = pd.read_csv('./results/data_nodes_experiment_1.csv', names=['Timestamp', 'Node', 'CPU', 'RAM', 'Storage'], skiprows=1)
 
 # Convertir le timestamp en objet datetime
 data['Timestamp'] = pd.to_datetime(data['Timestamp'])
