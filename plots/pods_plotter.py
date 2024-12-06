@@ -46,7 +46,8 @@ def calculate_time_difference(file_path):
         inter_node_delays = {} # Store transmission delays for each pod
         # Initialize dictionaries to store total times for each category and type
         total_pending_times = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        count_pending = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))        
+        count_pending = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        total_processing_delay =  defaultdict(lambda: defaultdict(lambda: defaultdict(int)))        
         total_end_to_end_times =  defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         # Iterate over each line in the file
         
@@ -56,7 +57,7 @@ def calculate_time_difference(file_path):
         for line in file:
             # Split the line into timestamp, pod, event, and optionally node name
             parts = line.strip().split(',')
-            timestamp_str, pod, event, running_node_name, origin_node, transmission_delay, inter_node_delay = parts
+            timestamp_str, pod, event, running_node_name, origin_node, transmission_delay, inter_node_delay, e2edelay = parts
 
             # Convert the timestamp string to total milliseconds
             timestamp_ms = convert_to_milliseconds(timestamp_str)
@@ -90,7 +91,8 @@ def calculate_time_difference(file_path):
                         category = pod.split('-pod-')[0]
                         pod_type = pod.split('-pod-')[1].split('-')[0]
                         total_pending_times[category][pod_type][running_node_name] += time_difference_pending
-                        total_end_to_end_times[category][pod_type][running_node_name] += time_difference_pending + int(transmission_delay) + int(inter_node_delay)
+                        #total_end_to_end_times[category][pod_type][running_node_name] += time_difference_pending + int(transmission_delay) + int(inter_node_delay)
+                        total_end_to_end_times[category][pod_type][running_node_name] += int(e2edelay)  + int(transmission_delay) + int(inter_node_delay)
                         count_pending[category][pod_type][running_node_name] += 1
 
             else:
@@ -104,11 +106,15 @@ def calculate_time_difference(file_path):
             for pod_type in total_pending_times[category]:
                 for running_node_name in total_pending_times[category][pod_type]:
                     if count_pending[category][pod_type][running_node_name] > 0:
-                        print(f"Category {category}, Type {pod_type}, Node {running_node_name}:") 
-                        avg_pending_time = total_pending_times[category][pod_type][running_node_name] / count_pending[category][pod_type][running_node_name]
+                        print(f"Category {category}, Type {pod_type}, Node {running_node_name}:")
+                        avg_pending_time = total_pending_times[category][pod_type][running_node_name] / count_pending[category][pod_type][running_node_name] 
                         print(f"Average Time difference (Pending-Succeeded) - {avg_pending_time} milliseconds")
                         avg_end_to_end_time = total_end_to_end_times[category][pod_type][running_node_name] / count_pending[category][pod_type][running_node_name]
-                        print(f"Average Time difference (End-to-end) - {avg_end_to_end_time} milliseconds\n")
+                        print(f"Average Time difference (End-to-end) - {avg_end_to_end_time} milliseconds\n")    
+                        
+                        #avg_end_to_end_process_time_time = total_processing_delay[category][pod_type][running_node_name] / count_pending[category][pod_type][running_node_name]
+                        #print(f"Average Time difference () - {avg_end_to_end_process_time_time} milliseconds\n")
+                        
 # Example usage
 calculate_time_difference("./results/data_pods_experiment_1.csv")
 
