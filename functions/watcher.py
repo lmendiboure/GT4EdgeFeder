@@ -15,7 +15,7 @@ def watch_pods(stop_event):
     try: 
 
         # Load configuration data from the YAML file
-        config_data = load_config("config.yaml")
+        config_data = load_config("temp-config.yaml")
         # Get the namespace from the configuration data
         namespace = config_data['namespace']
         
@@ -53,12 +53,12 @@ def watch_pods(stop_event):
             # Check the phase of the pod and take appropriate action
             if pod_phase == "Pending":
                 print(f"Pod {pod_name} is now Pending.")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", running_node, initial_node, transmission_delay, inter_node_delay,""])
+                #write_to_csv(results_file_pods, [timestamp, pod_name, "Pending", running_node, initial_node, transmission_delay, inter_node_delay,""])
 
             elif pod_phase == "Running":
                 # Write timestamp, pod name, and phase to the CSV file
                 print(f"Pod {pod_name} is now Running on Node {running_node}. Transmission delay is equal to {transmission_delay}. Inter node delay is equal to {inter_node_delay}")
-                write_to_csv(results_file_pods, [timestamp, pod_name, "Running", running_node, initial_node, transmission_delay, inter_node_delay,""])
+                #write_to_csv(results_file_pods, [timestamp, pod_name, "Running", running_node, initial_node, transmission_delay, inter_node_delay,""])
 		
             elif pod_phase == "Succeeded":
                 print(f"Pod {pod_name} is now Completed.")
@@ -95,7 +95,7 @@ def warmup_watcher():
     try: 
 
         # Load configuration data from the YAML file
-        config_data = load_config("config.yaml")
+        config_data = load_config("temp-config.yaml")
         # Get the namespace from the configuration data
         namespace = config_data['namespace']
                 
@@ -188,7 +188,7 @@ def get_cluster_node_usage(api_instance, config_data):
             storage_data[node_name] = min((total_storage_used/node_storage)*100,100)
             cpu_data[node_name] = min((total_cpu_used/node_cpu)*100,100)
             ram_data[node_name] = min((total_ram_used/node_ram)*100,100)
-
+            
         return storage_data, cpu_data, ram_data
 
     except Exception as e:
@@ -227,10 +227,10 @@ def watch_nodes(stop_event):
     """
     Get nodes data for a specific namespace.Complete data result file every second.
     """
-    config_data = load_config("config.yaml")
+    config_data = load_config("temp-config.yaml")
     results_file_nodes = config_data.get('results_file_nodes', 'data.csv') 
         
     while not stop_event.is_set():
         storage_data, cpu_data, ram_data = get_nodes_utilization(config_data,output_file=results_file_nodes)
         print(f"Storage:{storage_data}, CPU:{cpu_data}, RAM:{ram_data}")
-        time.sleep(2)
+        time.sleep(0.5)
