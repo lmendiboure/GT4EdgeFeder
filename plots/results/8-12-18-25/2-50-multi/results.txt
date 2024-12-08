@@ -1,0 +1,5 @@
+  Min : 5638.0
+  Max : 39105.0
+  Moyenne : 23478.70
+
+  Satisfaction rate : 95.74%

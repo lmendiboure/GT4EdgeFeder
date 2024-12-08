@@ -1,0 +1,6 @@
+Statistiques des valeurs e2edelay (tous pods confondus, event = Succeeded):
+  Min : 5862.0
+  Max : 36280.0
+  Moyenne : 23112.68
+
+  Satisfaction rate : 99.29%
