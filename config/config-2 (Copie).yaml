@@ -4,8 +4,8 @@
 
 expe_duration: 25 # Duration of the experimentation in seconds
 pods_interval: 1 # Average time to wait between the generation of pods
-min_number_per_interval: 10 # Lowest number of pods that can be generated for a given pods_interval
-max_number_per_interval: 14 # Highest number of pods that can be generated for a given pods_interval
+min_number_per_interval: 4 # Lowest number of pods that can be generated for a given pods_interval
+max_number_per_interval: 8 # Highest number of pods that can be generated for a given pods_interval
 game_interval: 0.5 # Average time to wait between two games
 reproductible_seed: DrLeoandMrStef # Seeding the PRNG for reproductibility in datasets and nodes/pods attributions
 
@@ -27,18 +27,18 @@ ran_dataset: ran_dataset.csv
 
 pods_config:
   - name: aeneas-pod
-    CPU: 240  # Set of CPU values in milli CPUs
+    CPU: 480  # Set of CPU values in milli CPUs
     RAM: 1500   # Set of RAM values in Mi
-    storage: 900  # Storage capacity for the nginx pod in MB
-    transmission_uplink: 427344 # bits to transmit over RAN (Bits)
+    storage: 1800  # Storage capacity for the nginx pod in MB
+    transmission_uplink: 427347 # bits to transmit over RAN (Bits)
     transmission_downlink: 816
     instructions: 54271527 # Real value : 8807684292 # number of instructions to be done
     deadline: 55 # Maximum delay for this app
   - name: julius-pod
-    CPU: 250  
-    RAM: 1000  
-    storage: 800 
-    transmission_uplink: 160096
+    CPU: 450  
+    RAM: 2000  
+    storage: 2500 
+    transmission_uplink: 160097
     transmission_downlink: 9032 
     instructions: 24271527 # Real value : 100141000000 ; Usually Used
     deadline: 60  
@@ -83,7 +83,7 @@ nodes_config:
     connections:
       - target_node: minikube-m02
         latency: 20 # Delay in ms
-        bandwidth: 1250 # Bandwidth in MB per second
+        bandwidth: 125 # Bandwidth in MB per second
   # Node 2
   - id: minikube-m02
     CPU_percentage: 0.5
@@ -106,5 +106,5 @@ nodes_config:
     connections:
       - target_node: minikube
         latency: 20 # Delay in ms
-        bandwidth: 1250 # Bandwidth in MB per second
+        bandwidth: 125 # Bandwidth in MB per second
   # Node X

@@ -1,0 +1,220 @@
+# Configuration file for experimentation, Kubernetes cluster, pod settings and experimentation settings
+
+# Configuration of experimentation
+
+expe_duration: 30 # Duration of the experimentation in seconds
+pods_interval: 1 # Average time to wait between the generation of pods
+min_number_per_interval: 8 # Lowest number of pods that can be generated for a given pods_interval
+max_number_per_interval: 16 # Highest number of pods that can be generated for a given pods_interval
+game_interval: 0.5 # Average time to wait between two games
+reproductible_seed: DrLeoandMrStef # Seeding the PRNG for reproductibility in datasets and nodes/pods attributions
+
+# Configuration for Kubernetes
+namespace: expe
+disk_size: 80000  # Disk size in MB => equally shared between nodes
+nodes_number: 5  # Number of nodes in the cluster
+memory: 8000 # RAM per node in MB
+cpus: 4  # Number of CPU cores per node
+
+# Configuration for experimentations results
+
+pods_dataset_file: pods_dataset.csv
+results_file_nodes: plots/results/data_nodes.csv
+results_file_pods: plots/results/data_pods.csv
+ran_dataset: ran_dataset.csv
+
+# Configuration for pods. Selected pods : https://zenodo.org/records/3974220
+
+pods_config:
+  - name: aeneas-pod
+    CPU: 480  # Set of CPU values in milli CPUs
+    RAM: 5000   # Set of RAM values in Mi
+    storage: 820  # Storage capacity for the nginx pod in MB
+    transmission_uplink: 427347 # bits to transmit over RAN (Bits)
+    transmission_downlink: 816
+    instructions: 54271527 # Real value : 8807684292 # number of instructions to be done
+    deadline: 55 # Maximum delay for this app
+  - name: julius-pod
+    CPU: 450  
+    RAM: 4500  
+    storage: 2500 
+    transmission_uplink: 160097
+    transmission_downlink: 9032 
+    instructions: 24271527 # Real value : 100141000000 ; Usually Used
+    deadline: 60  
+  - name: mrleo-pod
+    CPU: 350 
+    RAM: 6500  
+    storage: 950 
+    transmission_uplink: 41000
+    transmission_downlink: 41000
+    instructions: 14271527 # Real value : 544271527
+    deadline: 33
+#  - name: edgestorage-pod
+#    CPU: 20 
+#    RAM: 20  
+#    storage: 1000 # 1Go
+#     transmission_uplink: 1000000 
+#    transmission_downlink: 1000000
+#    instructions: 10 # Not instructions only data transfer
+#    deadline: 33 
+   
+# Configuration for nodes. Verify that the names used really corresponds to the names defined by Minikube.
+nodes_config:
+  # Node 1
+  - id: minikube
+    CPU_percentage: 0.16
+    RAM_percentage: 0.16
+    storage_percentage: 0.16
+    selfish-ratio: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 6470
+        gu: 7870
+        be: 8410
+      - pod-name: julius-pod
+        bu: 5980
+        gu: 5600
+        be: 5500
+      - pod-name: mrleo-pod
+        bu: 5400
+        gu: 5600
+        be: 5380
+    connections:
+      - target_node: minikube-m02
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+      - target_node: minikube-m03
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+      - target_node: minikube-m04
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+      - target_node: minikube-m05
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+  - id: minikube-m02
+    CPU_percentage: 0.16
+    RAM_percentage: 0.16
+    storage_percentage: 0.16
+    selfish-ratio: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 7050
+        gu: 8200
+        be: 8610
+      - pod-name: julius-pod
+        bu: 6200
+        gu: 5800
+        be: 6000
+      - pod-name: mrleo-pod
+        bu: 5800 
+        gu: 5400
+        be: 5210
+    connections:
+      - target_node: minikube
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m03
+        latency: 10
+        bandwidth: 1000000
+      - target_node: minikube-m04
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m05
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+  - id: minikube-m03
+    CPU_percentage: 0.16
+    RAM_percentage: 0.16
+    storage_percentage: 0.16
+    selfish-ratio: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 7090
+        gu: 8100
+        be: 8680
+      - pod-name: julius-pod
+        bu: 5900
+        gu: 5700
+        be: 5900
+      - pod-name: mrleo-pod
+        bu: 5700 
+        gu: 5300
+        be: 5290
+    connections:
+      - target_node: minikube
+        latency: 10 
+        bandwidth: 1000000 
+      - target_node: minikube-m02
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m04
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m05
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+  - id: minikube-m04
+    CPU_percentage: 0.16
+    RAM_percentage: 0.16
+    storage_percentage: 0.16
+    selfish-ratio: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 7090
+        gu: 8100
+        be: 8680
+      - pod-name: julius-pod
+        bu: 5900
+        gu: 5700
+        be: 5900
+      - pod-name: mrleo-pod
+        bu: 5700 
+        gu: 5300
+        be: 5290
+    connections:
+      - target_node: minikube
+        latency: 10 
+        bandwidth: 1000000 
+      - target_node: minikube-m02
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m03
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m05
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+  - id: minikube-m05
+    CPU_percentage: 0.16
+    RAM_percentage: 0.16
+    storage_percentage: 0.16
+    selfish-ratio: 0.5
+    average-processing-delay:
+      - pod-name: aeneas-pod
+        bu: 7090
+        gu: 8100
+        be: 8680
+      - pod-name: julius-pod
+        bu: 5900
+        gu: 5700
+        be: 5900
+      - pod-name: mrleo-pod
+        bu: 5700 
+        gu: 5300
+        be: 5290
+    connections:
+      - target_node: minikube
+        latency: 10 
+        bandwidth: 1000000 
+      - target_node: minikube-m02
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m03
+        latency: 10 
+        bandwidth: 1000000
+      - target_node: minikube-m04
+        latency: 10 # Delay in ms
+        bandwidth: 1000000 # Bandwidth in MB per second
+  # Node X
