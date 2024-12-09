@@ -1,1 +1,4 @@
-plots/**/*.pdf
+plots/**/cpu_usage.pdf
+plots/**/ram_usage.pdf
+plots/**/storage_usage.pdf
+plots/**/boxplot_e2edelay.pdf
