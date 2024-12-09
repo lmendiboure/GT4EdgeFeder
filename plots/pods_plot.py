@@ -1,13 +1,15 @@
 import os
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 
+path=sys.argv[1]
+file=path+'/data_pods_experiment_1.csv'
+output_file = path+"/boxplot_e2edelay.pdf"  # Nom du fichier de sortie
 
-# Ouvrir le fichier
-file_path = 'data_pods_experiment_1.csv'  # Remplacez par le chemin vers votre fichier
 # Charger les données dans un DataFrame pandas
 columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay"]
-df = pd.read_csv(file_path, sep=',', names=columns)
+df = pd.read_csv(file, sep=',', names=columns)
 
 # Filtrer les lignes où `event = "Succeeded"` et convertir `e2edelay` en numérique
 df['e2edelay'] = pd.to_numeric(df['e2edelay'], errors='coerce')  # Convertir les valeurs en nombres
@@ -66,11 +68,11 @@ plt.figure(figsize=(8, 6))
 plt.boxplot(df_filtered['e2edelay'], vert=False, patch_artist=True)
 plt.title("Box Plot des valeurs de e2edelay (tous pods confondus, event = Succeeded)")
 plt.xlabel("e2edelay")
-# Enregistrer la figure dans un fichier PNG
-output_file = "boxplot_e2edelay.png"  # Nom du fichier de sortie
-plt.savefig(output_file, format='png', dpi=300, bbox_inches='tight')  # Enregistrer avec une haute résolution
-print(f"Figure enregistrée sous : {output_file}")
+# Enregistrer la figure dans un fichier PDF
 
-plt.show()
+plt.savefig(output_file, format='pdf', dpi=300, bbox_inches='tight')  # Enregistrer avec une haute résolution
+# print(f"Figure enregistrée sous : {output_file}")
+
+plt.close()
 
 
