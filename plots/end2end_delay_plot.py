@@ -37,7 +37,6 @@ for subdir in os.listdir(path):
 	df['e2edelay'] = pd.to_numeric(df['e2edelay'], errors='coerce')  # Convertir les valeurs en nombres
 	df_filtered = df[df['event'] == "Succeeded"]  # Filtrer pour event = "Succeeded"
 	df_filtered = df_filtered.dropna(subset=['e2edelay'])  # Supprimer les lignes où e2edelay est NaN
-	df_filtered['e2edelay']=df_filtered['e2edelay'].div(1000)
 
 	# Mettre les données du fichier traité dans une structure globale
 	if subdir[2:] not in dataframes:
