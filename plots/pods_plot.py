@@ -22,7 +22,7 @@ max_value = df_filtered['e2edelay'].max()
 mean_value = df_filtered['e2edelay'].mean()
 
 # Calculer le pourcentage de valeurs inférieures à 38000
-threshold = 42000
+threshold = 40000
 percentage_below_threshold = (df_filtered['e2edelay'] < threshold).mean() * 100
 
 # Calcul du pourcentage de pods réussis qui ne sont pas réalisés sur leur noeud d'origine
