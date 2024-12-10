@@ -15,7 +15,7 @@ Help()
    echo "options:"
    echo "-h         Print this Help."
    echo "-d <directory> 	Enter directory path where dataset results are located."
-   echo
+   echo "exemple usage : ./generate_graphs -d results/8-12-18-25"
 }
 
 
