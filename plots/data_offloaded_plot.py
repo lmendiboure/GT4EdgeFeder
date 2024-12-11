@@ -40,7 +40,6 @@ for subdir in os.listdir(path):
 
 	# Calcul du pourcentage de pods réussis qui ne sont pas réalisés sur leur noeud d'origine
 	pods_non_origin_node = df_filtered[df_filtered['inter_node_delay'] != "0"]
-
 	percentage_non_origin_node = (len(pods_non_origin_node) / len(df_filtered)) * 100
 
 	# Calcul de la métrique `data_offload` si inter_node_delay est différent de 0
@@ -63,7 +62,7 @@ for subdir in os.listdir(path):
 	# Mettre données récupérées dans structure globale
 	if subdir[2:] not in dataframes:
 		dataframes[subdir[2:]] = dict()
-	dataframes[subdir[2:]][subdir[:1]] = (total_data_offload / 10**6)
+	dataframes[subdir[2:]][subdir[:1]] = percentage_non_origin_node
 
 # Desired order of keys (groups)
 group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'nous']
@@ -77,13 +76,13 @@ plotting_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
 # Layout formatting
 # plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1.0))
-plt.title("Communication costs at the federation level")
+plt.title("Application offload at the federation level")
 plt.xlabel("Orchestration Solutions")
-plt.ylabel("Generated network traffic (MBytes)")
+plt.ylabel("Applications offloaded (%)")
 plt.grid(zorder = 0)
 # Show or save
 # plt.show()
-save_file=path+'data_offloaded_grouped.pdf'
+save_file=path+'percent_offloaded_grouped.pdf'
 plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 # plt.close()
 
