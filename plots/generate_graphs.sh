@@ -44,7 +44,7 @@ fi
 
 
 ########################################################
-# Instrument resources plotter
+# Instrument resources plotter for each scenario
 ########################################################
 
 
@@ -69,4 +69,26 @@ for subdir in $(find "$directory" -mindepth 1 -maxdepth 1 -type d); do
     
 done
 
+########################################################
+# Instrument graph tools at Federation Level
+########################################################
 
+# End-to-end delays 3 boxplots
+echo "PLOTTING: End-to-end delay graphs"
+python3 end2end_delay_plot.py $directory
+echo "SUCCESS: End-to-end delay graphs"
+
+# Network Traffic Bargraphs
+echo "PLOTTING: Network Traffic graphs"
+python3 data_offloaded_plot.py $directory
+echo "SUCCESS: Network Traffic graphs"
+
+# Time to process (queue + traitement) boxplots
+echo "PLOTTING: Requests processing time graphs"
+python3 time_to_process_plot.py $directory
+echo "SUCCESS: Requests processing time graphs"
+
+# Percentage of user satisfaction bargraphs
+echo "PLOTTING: Users levels of satisfaction graphs"
+python3 satisfaction_rate_plot.py $directory
+echo "SUCCESS: Users levels of satisfaction graphs"
