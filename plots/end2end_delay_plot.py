@@ -68,7 +68,7 @@ sns.boxplot(data=final_df, x='Group', y='e2edelay', hue='Subgroup', order=group_
                        "markeredgecolor":"red",
                       "markersize":"10"}  )
 # Add a title
-plt.title("Box Plot of Total Bill by Day and Smoker Status")
+plt.title("Time between users requests and responses")
 
 # Add labels to the axes
 plt.xlabel("Orchestration Solutions")
