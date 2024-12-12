@@ -4,7 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 path=sys.argv[1]
-file=path+'/data_nodes_experiment_1.csv'
+if path[-1] != '/':
+    path+='/'
+file=path+'data_nodes_experiment_1.csv'
 # Lire les données à partir du fichier CSV
 data = pd.read_csv(file, names=['Timestamp', 'Node', 'CPU', 'RAM', 'Storage'], skiprows=1)
 

@@ -4,7 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 path=sys.argv[1]
-file=path+'/data_pods_experiment_1.csv'
+if path[-1] != '/':
+    path+='/'
+file=path+'data_pods_experiment_1.csv'
 output_file = path+"/boxplot_e2edelay.pdf"  # Nom du fichier de sortie
 
 # Charger les données dans un DataFrame pandas
