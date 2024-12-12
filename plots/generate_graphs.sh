@@ -54,10 +54,17 @@ for subdir in $(find "$directory" -mindepth 1 -maxdepth 1 -type d); do
 
     python3 nodes_plot.py $subdir
 	if [ $? -eq 0 ]; then
-	   echo "OK: Nodes plotting on $subdir OK."
+	   echo "OK: Nodes plotted on $subdir OK."
 	   python3 pods_plot.py $subdir
 	   	if [ $? -eq 0 ]; then
-	   		echo "OK: Pods plotting on $subdir OK."
+	   		echo "OK: Pods plotted on $subdir OK."
+            python3 resource_consumption_over_time_plot.py $subdir
+               if [ $? -eq 0 ]; then
+                  echo "OK: Resources plotted on $subdir OK."
+               else
+                  echo "FAILED: Resources plotting on $subdir error."
+                  exit
+               fi
 	   	else
 	   		echo "FAILED: Nodes plotting on $subdir error."
 	   		exit
