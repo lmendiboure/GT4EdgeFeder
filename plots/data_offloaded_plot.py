@@ -62,7 +62,7 @@ for subdir in os.listdir(path):
 	# Mettre données récupérées dans structure globale
 	if subdir[2:] not in dataframes:
 		dataframes[subdir[2:]] = dict()
-	dataframes[subdir[2:]][subdir[:1]] = total_data_offload
+	dataframes[subdir[2:]][subdir[:1]] = percentage_non_origin_node # percentage_non_origin_node/total_data_offload
 
 # Desired order of keys (groups)
 group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'nous']
@@ -76,15 +76,15 @@ plotting_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
 # Layout formatting
 # plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1.0))
-plt.title("Application offload at the federation level")
+# plt.title("Application offload at the federation level")
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("Applications offloaded (%)")
 plt.grid(zorder = 0)
 # Show or save
-plt.show()
-save_file=path+'data_offloaded_grouped.pdf'
-# plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
-# plt.close()
+# plt.show()
+save_file=path+'percent_offloaded_grouped.pdf'
+plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
+plt.close()
 
 # # Same ops but for compare against a subset
 # group_order = ['25-solo','50-solo', '75-solo', 'nous']
