@@ -11,7 +11,7 @@ def rename_results_files(experiment_number):
     """Rename all result files to include the experiment number."""
     
     # Load configuration data from the YAML file
-    config_data = load_config("config.yaml")
+    config_data = load_config("temp-config.yaml")
     
     # Get experiment files from the configuration data
     
@@ -130,7 +130,7 @@ def clean_experiment_files():
     """
     
     # Load configuration data from the YAML file
-    config_data = load_config("config.yaml")
+    config_data = load_config("temp-config.yaml")
     
     # Get experiment files from the configuration data
     
@@ -139,7 +139,7 @@ def clean_experiment_files():
     
     # Empty Files  
     clean_csv(results_file_pods)
-    data=["timestamp", "pod_name", "Status", "initial_node", "running_node", "ran_delay", "inter_node_delay"]
+    data=["timestamp", "pod_name", "status", "initial_node", "running_node", "ran_delay", "inter_node_delay","e2eDelay","queuing_delay","waiting_number"]
     write_to_csv(results_file_pods, data)
     clean_csv(results_file_nodes)
     data=["timestamp", "node_name", "CPU", "RAM", "storage"]
@@ -178,7 +178,7 @@ def get_inter_node_delay(config_data,origin_node,destination_node,data):
             for connection in node["connections"]:
                 if connection["target_node"] == destination_node:
                     # Sum latency + time to transmit data (uplink + downlink)
-                    delay = ceil(connection["latency"] + data/connection["bandwidth"])
+                    delay = ceil(connection["latency"] + data/(connection["bandwidth"]*1000))
     return delay
 
 def order_nodes_by_delay(config_data, nodes, initial_node, data, podtype, podclass, include_initial_node=True):
@@ -264,7 +264,7 @@ def delete_pods():
     """
     
     # Load configuration data from the YAML file
-    config_data = load_config("config.yaml")
+    config_data = load_config("temp-config.yaml")
     # Get the namespace from the configuration data
     namespace = config_data['namespace']
     # Load Kubernetes configuration from default location
