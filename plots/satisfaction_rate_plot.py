@@ -71,8 +71,8 @@ plt.xlabel("Orchestration Solutions")
 plt.ylabel("User satisfaction (%)")
 plt.grid(zorder = 0)
 # Show or save
-plt.show()
-sys.exit(0)
+# plt.show()
+# sys.exit(0)
 save_file=path+'satisfaction_rate_grouped.pdf'
 plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 plt.close()
