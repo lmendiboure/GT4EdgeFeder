@@ -8,7 +8,7 @@ path=sys.argv[1]
 if path[-1] != '/':
     path+='/'
 file=path+'data_nodes_experiment_1.csv'
-file_name = path.split('/')[-2] + '_conso_ALL_resources.pdf'
+file_name = path + path.split('/')[-2] + '_conso_ALL_resources.pdf'
 def debug(object):
     print(type(object))
     print(object)
