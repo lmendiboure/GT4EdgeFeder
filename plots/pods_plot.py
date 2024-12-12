@@ -10,7 +10,7 @@ file=path+'data_pods_experiment_1.csv'
 output_file = path+"/boxplot_e2edelay.pdf"  # Nom du fichier de sortie
 
 # Charger les données dans un DataFrame pandas
-columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay"]
+columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay", "queuing_delay", "waiting_number"]
 df = pd.read_csv(file, sep=',', names=columns)
 
 # Filtrer les lignes où `event = "Succeeded"` et convertir `e2edelay` en numérique

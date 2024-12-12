@@ -30,7 +30,7 @@ for subdir in os.listdir(path):
 	file=path+subdir+'/data_pods_experiment_1.csv'
 
 	# Charger les données dans un DataFrame pandas
-	columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay"]
+	columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay", "queuing_delay", "waiting_number"]
 	df = pd.read_csv(file, sep=',', names=columns)
 
 	# Filtrer les lignes où `event = "Succeeded"` et convertir `e2edelay` en numérique
@@ -71,7 +71,8 @@ plt.xlabel("Orchestration Solutions")
 plt.ylabel("User satisfaction (%)")
 plt.grid(zorder = 0)
 # Show or save
-# plt.show()
+plt.show()
+sys.exit(0)
 save_file=path+'satisfaction_rate_grouped.pdf'
 plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 plt.close()

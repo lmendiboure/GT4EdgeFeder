@@ -30,7 +30,7 @@ for subdir in os.listdir(path):
 	file=path+subdir+'/data_pods_experiment_1.csv'
 
 	# Charger les données dans un DataFrame pandas
-	columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay"]
+	columns = ["timestamp", "pod", "event", "running_node_name", "origin_node", "transmission_delay", "inter_node_delay", "e2edelay", "queuing_delay", "waiting_number"]
 	df = pd.read_csv(file, sep=',', names=columns)
 
 	# Filtrer les lignes où `event = "Succeeded"` et convertir `e2edelay` en numérique
@@ -62,7 +62,7 @@ for subdir in os.listdir(path):
 	# Mettre données récupérées dans structure globale
 	if subdir[2:] not in dataframes:
 		dataframes[subdir[2:]] = dict()
-	dataframes[subdir[2:]][subdir[:1]] = percentage_non_origin_node
+	dataframes[subdir[2:]][subdir[:1]] = total_data_offload
 
 # Desired order of keys (groups)
 group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'nous']
@@ -81,9 +81,9 @@ plt.xlabel("Orchestration Solutions")
 plt.ylabel("Applications offloaded (%)")
 plt.grid(zorder = 0)
 # Show or save
-# plt.show()
-save_file=path+'percent_offloaded_grouped.pdf'
-plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
+plt.show()
+save_file=path+'data_offloaded_grouped.pdf'
+# plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 # plt.close()
 
 # # Same ops but for compare against a subset
