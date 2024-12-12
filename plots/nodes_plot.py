@@ -23,13 +23,13 @@ data['TimeElapsed'] = (data['Timestamp'] - start_time).dt.total_seconds()
 # Fonction pour afficher min, max et moyenne
 def plot_statistique(data, stat_name, ylabel, title, file_name):
     stat_data = data.groupby('TimeElapsed').agg({stat_name: ['min', 'max', 'mean']})
-    stat_data.columns = ['Min', 'Max', 'Mean']  # Renommer les colonnes pour plus de clarté
+    stat_data.columns = ['min', 'max', 'mean']  # Renommer les colonnes pour plus de clarté
 
     # Plot des valeurs min, max et moyenne
     plt.figure(figsize=(10, 6))
-    plt.plot(stat_data.index, stat_data['Min'], label='Min', linestyle='--')
-    plt.plot(stat_data.index, stat_data['Max'], label='Max', linestyle='-.')
-    plt.plot(stat_data.index, stat_data['Mean'], label='Mean', linestyle='-')
+    plt.plot(stat_data.index, stat_data['min'], label='Min', linestyle='--')
+    plt.plot(stat_data.index, stat_data['max'], label='Max', linestyle='-.')
+    plt.plot(stat_data.index, stat_data['mean'], label='Mean', linestyle='-')
 
     plt.xlabel('Time (s)')
     plt.ylabel(ylabel)
