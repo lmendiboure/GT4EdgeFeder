@@ -99,7 +99,7 @@ sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='ConfigHW', or
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("time (ms)")
 plt.grid()
-plt.show()
+# plt.show()
 # Save file à la racine
 save_file=path+'time_in_queue_grouped.pdf'
 plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
