@@ -1,3 +1,10 @@
+# At the general level
+
+'''
+./generate_graphs.sh -d results/12-12-12-00/
+'''
+Instrument bash script to generate all graphs
+
 
 # At Resources level
 '''
