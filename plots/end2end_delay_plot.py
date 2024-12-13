@@ -68,7 +68,7 @@ sns.boxplot(data=final_df, x='Group', y='e2edelay', hue='Subgroup', order=group_
                        "markeredgecolor":"red",
                       "markersize":"10"}  )
 # Add a title
-plt.title("Time between users requests and responses")
+# plt.title("Time between users requests and responses")
 
 # Add labels to the axes
 plt.xlabel("Orchestration Solutions")
@@ -92,7 +92,7 @@ sns.boxplot(data=filtered_df, x='Group', y='e2edelay', hue='Subgroup', order=gro
                        "markeredgecolor":"red",
                       "markersize":"10"}  )
 # Add a title
-plt.title("Distribution of end-to-end delays in application processing request")
+# plt.title("Distribution of end-to-end delays in application processing request")
 # Add labels to the axes
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("time (s)")
@@ -114,7 +114,7 @@ sns.boxplot(data=filtered_df, x='Group', y='e2edelay', hue='Subgroup', order=gro
                        "markeredgecolor":"red",
                       "markersize":"10"}  )
 # Add a title
-plt.title("Distribution of end-to-end delays in application processing request")
+# plt.title("Distribution of end-to-end delays in application processing request")
 # Add labels to the axes
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("time (s)")
