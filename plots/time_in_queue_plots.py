@@ -82,7 +82,6 @@ grouped_df = pd.concat(rows, ignore_index=True)
 
 
 
-
 # Boxplot it
 solution_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 configHW_order = ['2', '4', '8'] 
