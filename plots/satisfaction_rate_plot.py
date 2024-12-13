@@ -55,7 +55,7 @@ for subdir in os.listdir(path):
 # plt.show()
 
 # Desired order of keys (groups)
-group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'nous']
+group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'FaIRMEC']
 subgroup_order = ['2', '4', '8'] 
 # Create DataFrame and reorder based on the desired order
 plotting_data = pd.DataFrame(dataframes).transpose()
@@ -66,7 +66,7 @@ plotting_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
 # Layout formatting
 # plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(0.08, 1.0))
-plt.title("User satisfaction levels in application processing request")
+# plt.title("User satisfaction levels in application processing request")
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("User satisfaction (%)")
 plt.grid(zorder = 0)
@@ -78,12 +78,12 @@ plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 plt.close()
 
 # Same ops but for compare against a subset
-group_order = ['25-solo','50-solo', '75-solo', 'nous']
+group_order = ['25-solo','50-solo', '75-solo', 'FaIRMEC']
 filtered_data = plotting_data.loc[group_order]
 filtered_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
 # Layout formatting
 plt.legend(loc='upper left', bbox_to_anchor=(0.08, 1.0))
-plt.title("User satisfaction levels in application processing request")
+# plt.title("User satisfaction levels in application processing request")
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("User satisfaction (%)")
 plt.grid(zorder = 0)
@@ -93,12 +93,12 @@ plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 plt.close()
 
 # # Same ops but for compare against a subset
-group_order = ['25-multi','50-multi', '75-multi', 'nous']
+group_order = ['25-multi','50-multi', '75-multi', 'FaIRMEC']
 filtered_data = plotting_data.loc[group_order]
 filtered_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
 # Layout formatting
 plt.legend(loc='upper left', bbox_to_anchor=(0.08, 1.0))
-plt.title("User satisfaction levels in application processing request")
+# plt.title("User satisfaction levels in application processing request")
 plt.xlabel("Orchestration Solutions")
 plt.ylabel("User satisfaction (%)")
 plt.grid(zorder = 0)

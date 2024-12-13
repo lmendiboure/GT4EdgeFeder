@@ -36,7 +36,7 @@ for subdir in os.listdir(path):
 	# df['CPU'] = pd.to_numeric(df['CPU'], errors='coerce')
 	if subdir[2:] not in dataframes:
 		dataframes[subdir[2:]]=dict()
-	dataframes[subdir[2:]][subdir[:1]] = data['CPU']
+	dataframes[subdir[2:]][subdir[:1]] = data['RAM']
 	# dataframes[subdir[2:]][subdir[:1]] += data['RAM']
 	# dataframes[subdir[2:]][subdir[:1]] += data['Storage']
 	# debug(dataframes)
@@ -48,7 +48,7 @@ for group, subgroups in dataframes.items():
         df = pd.DataFrame({
             'Group': group,
             'Subgroup': subgroup,
-            'CPU': series.values
+            'RAM': series.values
         })
         rows.append(df)
 
@@ -56,10 +56,10 @@ for group, subgroups in dataframes.items():
 final_df = pd.concat(rows, ignore_index=True)
 
 # Boxplot it
-group_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "nous"]  # Order for the groups
+group_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 subgroup_order = ['2', '4', '8'] 
 plt.figure(figsize=(12, 6))
-sns.boxplot(data=final_df, x='Group', y='CPU', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True,
+sns.boxplot(data=final_df, x='Group', y='RAM', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True,
             showfliers=False,meanprops={"marker":"*",
                        "markerfacecolor":"red", 
                        "markeredgecolor":"red",
@@ -70,7 +70,7 @@ plt.title("CPU resources usage distribution")
 # Add labels to the axes
 plt.ylim(0,105)
 plt.xlabel("Orchestration Solutions")
-plt.ylabel("CPU usage over time (%)")
+plt.ylabel("RAM usage over time (%)") 
 plt.show()
 
 	# # Convertir le timestamp en objet datetime

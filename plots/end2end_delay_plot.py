@@ -59,7 +59,7 @@ for group, subgroups in dataframes.items():
 final_df = pd.concat(rows, ignore_index=True)
 
 # Boxplot it
-group_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "nous"]  # Order for the groups
+group_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 subgroup_order = ['2', '4', '8'] 
 plt.figure(figsize=(12, 6))
 sns.boxplot(data=final_df, x='Group', y='e2edelay', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True,
@@ -84,7 +84,7 @@ plt.close()
 group_order = ['25-solo', '50-solo', '75-solo', "nous"]  # Order for the groups
 subgroup_order = ['2', '4', '8'] 
 plt.figure(figsize=(6, 6))
-filtered_df = final_df[final_df['Group'].isin(['25-solo', '50-solo', '75-solo', "nous"])]
+filtered_df = final_df[final_df['Group'].isin(['25-solo', '50-solo', '75-solo', "FaIRMEC"])]
 
 sns.boxplot(data=filtered_df, x='Group', y='e2edelay', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True,
             meanprops={"marker":"*",
@@ -106,7 +106,7 @@ plt.close()
 group_order = ['25-multi', '50-multi', '75-multi', "nous"]  # Order for the groups
 subgroup_order = ['2', '4', '8'] 
 plt.figure(figsize=(6, 6))
-filtered_df = final_df[final_df['Group'].isin(['25-multi', '50-multi', '75-multi', "nous"])]
+filtered_df = final_df[final_df['Group'].isin(['25-multi', '50-multi', '75-multi', "FaIRMEC"])]
 
 sns.boxplot(data=filtered_df, x='Group', y='e2edelay', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True,
             meanprops={"marker":"*",

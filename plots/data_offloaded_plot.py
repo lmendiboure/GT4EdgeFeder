@@ -65,7 +65,7 @@ for subdir in os.listdir(path):
 	dataframes[subdir[2:]][subdir[:1]] = percentage_non_origin_node # percentage_non_origin_node/total_data_offload
 
 # Desired order of keys (groups)
-group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'nous']
+group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'FaIRMEC']
 subgroup_order = ['2', '4', '8'] 
 # Create DataFrame and reorder based on the desired order
 plotting_data = pd.DataFrame(dataframes).transpose()
