@@ -99,3 +99,8 @@ echo "SUCCESS: Requests processing time graphs"
 echo "PLOTTING: Users levels of satisfaction graphs"
 python3 satisfaction_rate_plot.py $directory
 echo "SUCCESS: Users levels of satisfaction graphs"
+
+# Time spent waiting to be run
+echo "PLOTTING: Time spend in the qeueu for various fed size graphs"
+python3 time_in_queue_plots.py $directory
+echo "SUCCESS: Time spend in the qeueu for various fed size graphs"
