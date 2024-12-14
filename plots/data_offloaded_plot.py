@@ -22,6 +22,8 @@ def debug(object):
 	print(type(object))
 	print(object)
 	sys.exit(0)
+
+
 for rundirs in os.listdir(path):
 	if os.path.isfile(path+rundirs):
 		continue
@@ -82,24 +84,26 @@ for group, subgroups in dataframes.items():
 		dataframes[group][series] /= cnt_runs
 # sys.exit(0)
 # Desired order of keys (groups)
-group_order = ['25-solo','50-solo', '75-solo', '25-multi', '50-multi', '75-multi',  'FaIRMEC']
+group_order = ['25-multi', '50-multi', '75-multi',  'FaIRMEC']
 subgroup_order = ['2', '4', '8'] 
 # Create DataFrame and reorder based on the desired order
 plotting_data = pd.DataFrame(dataframes).transpose()
 plotting_data = plotting_data.reindex(group_order)
 plotting_data = plotting_data[subgroup_order]
+
 # Plot it
-plt.figure(figsize=(6,6))
-plotting_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
-# Layout formatting
-# plt.tight_layout()
-plt.legend(loc='upper left', bbox_to_anchor=(0.8, 1.0))
-# plt.title("Application offload at the federation level")
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("Applications offloaded (%)")
+plotting_data.plot(kind='bar', width=0.9, figsize=(6, 5), zorder = 3)
+plt.xlabel("Orchestration Solutions", fontsize=12)
+plt.ylabel("Applications offloaded (%)", fontsize=12)
+plt.xticks(fontsize=12, rotation=45)
+plt.yticks(fontsize=12)
+plt.legend()
+plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
+# Style it
 plt.grid(zorder = 0)
 plt.tight_layout()
-# Show or save
+sns.despine()
+# Show or save it
 # plt.show()
 save_file=path+'percent_offloaded_average_multiruns.pdf'
 plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')

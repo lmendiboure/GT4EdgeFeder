@@ -25,6 +25,8 @@ def debug(object):
 	print(object.items())
 	sys.exit(0)
 
+
+
 for subdir in os.listdir(path):
 
 	# Discard files and process only directories
@@ -45,7 +47,7 @@ for subdir in os.listdir(path):
 	# ATTENTION, dans cette proposition, nos boxplots sont au nombre de 3, i.e. 2, 4 et 8.
 	if subdir[2:] not in dataframes_grouped:
 		dataframes_grouped[subdir[2:]]=dict()
-	dataframes_grouped[subdir[2:]][subdir[:1]]=df_filtered['queuing_delay']
+	dataframes_grouped[subdir[2:]][subdir[:1]]=df_filtered['queuing_delay']/1000
 
 
 # debug(dataframes_grouped)
@@ -57,7 +59,7 @@ for group, subgroups in dataframes_grouped.items():
         # Create a DataFrame for this specific series
         df = pd.DataFrame({
             'Solution': group,
-            'ConfigHW': subgroup,
+            'Orchestrators': subgroup,
             'queuing_delay': series.values
         })
         rows.append(df)
@@ -85,8 +87,8 @@ grouped_df = pd.concat(rows, ignore_index=True)
 # Boxplot it
 solution_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 configHW_order = ['2', '4', '8'] 
-plt.figure(figsize=(6, 6))
-sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='ConfigHW', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
+plt.figure(figsize=(6, 5))
+ax = sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='Orchestrators', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
             meanprops={"marker":"*",
                        "markerfacecolor":"red", 
                        "markeredgecolor":"red",
@@ -95,9 +97,10 @@ sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='ConfigHW', or
 # plt.title("Time between users requests and responses")
 
 # Add labels to the axes
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("time (ms)")
+plt.xlabel("Orchestration Solutions",fontsize=12)
+plt.ylabel("time (s)",fontsize=12)
 plt.grid()
+plt.tight_layout()
 # plt.show()
 # Save file à la racine
 save_file=path+'time_in_queue_grouped.pdf'
@@ -110,37 +113,58 @@ plt.close()
 # debug(custom_palette)
 colors =  [plt.color_sequences["tab10"][0]]
 # # Same operation but only for 2 orchestrators
-plt.figure(figsize=(6, 6))
+plt.figure(figsize=(5,6))
+solution_order = ['25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 configHW_order = ['2'] 
-sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='ConfigHW', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
+ax = sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='Orchestrators', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
             meanprops={"marker":"*",
                        "markerfacecolor":"red", 
                        "markeredgecolor":"red",
                       "markersize":"10"}, palette = colors )
 # Add labels to the axes
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("time (ms)")
-plt.grid()
+ax.set_xlabel("Orchestration Solutions",fontsize=12)
+ax.set_ylabel("time (s)",fontsize=20)
+ax.tick_params(axis='both', labelsize=20)
+plt.xticks(fontsize=20, rotation=45)
+plt.legend(fontsize=20)
+# legend = ax.get_legend()
+# legend.set_fontsize(20)
+# plt.yticks(fontsize=12)
+# plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
+# sns.set(font_scale=2)
+plt.grid(zorder = 0)
+plt.tight_layout()
+sns.despine()
 # Save file à la racine
 save_file=path+'time_in_queue_' + configHW_order[0] + '_orchestrators.pdf'
-# plt.show()
 plt.savefig(save_file, format='pdf', dpi=300, bbox_inches='tight')
 plt.close()
 
 # # # Same operation but only for 4 orchestrators
 colors =  [plt.color_sequences["tab10"][1]]
 # # Same operation but only for 2 orchestrators
-plt.figure(figsize=(6, 6))
+plt.figure(figsize=(5,6))
+solution_order = ['25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 configHW_order = ['4'] 
-sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='ConfigHW', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
+ax=sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='Orchestrators', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
             meanprops={"marker":"*",
                        "markerfacecolor":"red", 
                        "markeredgecolor":"red",
                       "markersize":"10"}, palette = colors )
 # Add labels to the axes
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("time (ms)")
-plt.grid()
+ax.set_xlabel("Orchestration Solutions",fontsize=20)
+ax.set_ylabel("time (s)",fontsize=20)
+ax.tick_params(axis='both', labelsize=20)
+plt.xticks(fontsize=20, rotation=45)
+plt.legend(fontsize=20)
+# legend = ax.get_legend()
+# legend.set_fontsize(20)
+# plt.yticks(fontsize=12)
+# plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
+# sns.set(font_scale=2)
+plt.grid(zorder = 0)
+plt.tight_layout()
+sns.despine()
 # Save file à la racine
 save_file=path+'time_in_queue_' + configHW_order[0] + '_orchestrators.pdf'
 # plt.show()
@@ -150,17 +174,28 @@ plt.close()
 # # # Same operation but only for 8 orchestrators
 colors =  [plt.color_sequences["tab10"][2]]
 # # Same operation but only for 2 orchestrators
-plt.figure(figsize=(6, 6))
+plt.figure(figsize=(5,6))
+solution_order = ['25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 configHW_order = ['8'] 
-sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='ConfigHW', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
+ax = sns.boxplot(data=grouped_df, x='Solution', y='queuing_delay', hue='Orchestrators', order=solution_order, hue_order=configHW_order, fill=False, showmeans=True,
             meanprops={"marker":"*",
                        "markerfacecolor":"red", 
                        "markeredgecolor":"red",
                       "markersize":"10"}, palette = colors )
 # Add labels to the axes
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("time (ms)")
-plt.grid()
+ax.set_xlabel("Orchestration Solutions",fontsize=20)
+ax.set_ylabel("time (s)",fontsize=20)
+ax.tick_params(axis='both', labelsize=20)
+plt.xticks(fontsize=20, rotation=45)
+plt.legend(fontsize=20)
+# legend = ax.get_legend()
+# legend.set_fontsize(20)
+# plt.yticks(fontsize=12)
+# plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
+# sns.set(font_scale=2)
+plt.grid(zorder = 0)
+plt.tight_layout()
+sns.despine()
 # Save file à la racine
 save_file=path+'time_in_queue_' + configHW_order[0] + '_orchestrators.pdf'
 # plt.show()

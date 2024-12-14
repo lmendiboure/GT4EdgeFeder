@@ -41,7 +41,7 @@ for subdir in os.listdir(path):
 	# Mettre les données du fichier traité dans une structure globale
 	if subdir[2:] not in dataframes:
 		dataframes[subdir[2:]]=dict()
-	dataframes[subdir[2:]][subdir[:1]]=df_filtered['e2edelay']
+	dataframes[subdir[2:]][subdir[:1]]=df_filtered['e2edelay']/1000
 
 # Applanir la structure pour en faire un dataframe panda
 rows = []
@@ -61,8 +61,8 @@ final_df = pd.concat(rows, ignore_index=True)
 # Boxplot it
 group_order = ['25-solo', '50-solo', '75-solo', '25-multi', '50-multi', '75-multi', "FaIRMEC"]  # Order for the groups
 subgroup_order = ['2', '4', '8'] 
-plt.figure(figsize=(12, 6))
-sns.boxplot(data=final_df, x='Group', y='e2edelay', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True,
+plt.figure(figsize=(18, 6))
+ax = sns.boxplot(data=final_df, x='Group', y='e2edelay', hue='Subgroup', order=group_order, hue_order=subgroup_order, fill=False, showmeans=True, width=0.75,
             meanprops={"marker":"*",
                        "markerfacecolor":"red", 
                        "markeredgecolor":"red",
@@ -71,8 +71,15 @@ sns.boxplot(data=final_df, x='Group', y='e2edelay', hue='Subgroup', order=group_
 # plt.title("Time between users requests and responses")
 
 # Add labels to the axes
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("time (s)")
+ax.set_xlabel("Orchestration Solutions",fontsize=20)
+ax.set_ylabel("time (s)",fontsize=20)
+ax.tick_params(axis='both', labelsize=20)
+plt.xticks(fontsize=20, rotation=45)
+plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='20', fontsize=20)
+# Style it
+plt.grid(zorder = 0)
+plt.tight_layout()
+sns.despine()
 
 # Save file à la racine
 save_file=path+'e2edelay_grouped.pdf'
