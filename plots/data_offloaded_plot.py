@@ -11,7 +11,7 @@ import seaborn as sns
 #
 #
 ####################################
-path=sys.argv[1]
+path=sys.argv[1].split('/')[0]
 if path[-1] != '/':
 	path+='/'
 subdir_list=dict()
@@ -28,8 +28,9 @@ for rundirs in os.listdir(path):
 	if os.path.isfile(path+rundirs):
 		continue
 	subpath = path+rundirs + '/'
-	print(subpath)
+	# print(subpath)s
 	for subdir in os.listdir(subpath):
+		# print(subpath + subdir )
 		# Discard files and process only directories
 		if os.path.isfile(subpath+subdir):
 			continue
@@ -47,8 +48,8 @@ for rundirs in os.listdir(path):
 		# Calcul du pourcentage de pods réussis qui ne sont pas réalisés sur leur noeud d'origine
 		pods_non_origin_node = df_filtered[df_filtered['inter_node_delay'] != "0"]
 		percentage_non_origin_node = (len(pods_non_origin_node) / len(df_filtered)) * 100
-		print(subpath+subdir)
-		print(percentage_non_origin_node)
+		# print(subpath+subdir)
+		# print(percentage_non_origin_node)
 		# Calcul de la métrique `data_offload` si inter_node_delay est différent de 0
 		df_filtered['data_offload'] = 0  # Initialisation d'une nouvelle colonne 'data_offload'
 
@@ -77,16 +78,17 @@ for rundirs in os.listdir(path):
 
 # debug(dataframes)
 for group, subgroups in dataframes.items():
-	print(group)
+	# print(group)
 	for series in dataframes[group]:
-		print(series)
-		print(dataframes[group])
+		# print(series)
+		# print(dataframes[group])
 		dataframes[group][series] /= cnt_runs
 # sys.exit(0)
 # Desired order of keys (groups)
 group_order = ['25-multi', '50-multi', '75-multi',  'FaIRMEC']
 subgroup_order = ['2', '4', '8'] 
 # Create DataFrame and reorder based on the desired order
+# debug(dataframes)
 plotting_data = pd.DataFrame(dataframes).transpose()
 plotting_data = plotting_data.reindex(group_order)
 plotting_data = plotting_data[subgroup_order]

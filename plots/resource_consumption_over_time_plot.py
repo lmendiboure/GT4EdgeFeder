@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 path=sys.argv[1]
 if path[-1] != '/':
@@ -45,9 +46,16 @@ def plot_statistique(data, stat_name):
     plt.fill_between(stat_data.index, stat_data['Min'], stat_data['Max'], color=colorfill, alpha=0.5, label='Min-Max '+stat_name)
 
     # Plot mean
-    sns.lineplot(x='TimeElapsed', y='Mean', data=stat_data, color=color, label='Mean '+ stat_name)
+    ax = sns.lineplot(x='TimeElapsed', y='Mean', data=stat_data, color=color, label='Mean '+ stat_name)
 
 
+def export_legend(legend, filelegend=path + path.split('/')[-2] +"resources_legend.pdf", expand=[-5,-5,5,5]):
+    fig  = legend.figure
+    fig.canvas.draw()
+    bbox  = legend.get_window_extent()
+    bbox = bbox.from_extents(*(bbox.extents + np.array(expand)))
+    bbox = bbox.transformed(fig.dpi_scale_trans.inverted())
+    fig.savefig(filelegend, dpi="figure", bbox_inches=bbox,  format='pdf')
 
 
 # Plot des valeurs min, max et moyenne
@@ -63,11 +71,18 @@ plot_statistique(data, 'Storage')
 
 ylabel = 'Resources usage (%)'
 
-plt.xlabel('Time (s)')
-plt.ylabel(ylabel)
+plt.xlabel('Time (s)', fontsize=20)
+plt.ylabel(ylabel, fontsize=20)
 plt.ylim(0, 105) 
-
-plt.legend()
-plt.grid(True)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.tight_layout()
+legend = plt.legend( fontsize=20, loc='upper left', bbox_to_anchor=(1.0, 0.5), ncol=3)
+# plt.show()
+export_legend(legend)
+legend.remove()
+# plt.show()
+# plt.legend()
+plt.grid(zorder = 0)
 plt.savefig(file_name)  
 # plt.show()

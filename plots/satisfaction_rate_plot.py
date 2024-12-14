@@ -62,13 +62,17 @@ plotting_data = pd.DataFrame(dataframes).transpose()
 plotting_data = plotting_data.reindex(group_order)
 plotting_data = plotting_data[subgroup_order]
 # Plot it
-plotting_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
+plotting_data.plot(kind='bar', width=0.9, figsize=(6, 5), zorder = 3)
 # Layout formatting
 # plt.tight_layout()
-plt.legend(loc='upper left', bbox_to_anchor=(0.08, 1.0))
+plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
 # plt.title("User satisfaction levels in application processing request")
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("User satisfaction (%)")
+plt.xlabel("Orchestration Solutions", fontsize=12)
+plt.ylabel("User satisfaction (%)", fontsize=12)
+plt.xticks(fontsize=12, rotation=45)
+plt.yticks(fontsize=12)
+plt.tight_layout()
+sns.despine()
 plt.grid(zorder = 0)
 # Show or save
 # plt.show()
@@ -80,12 +84,16 @@ plt.close()
 # Same ops but for compare against a subset
 group_order = ['25-solo','50-solo', '75-solo', 'FaIRMEC']
 filtered_data = plotting_data.loc[group_order]
-filtered_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
+filtered_data.plot(kind='bar', width=0.9, figsize=(6, 5), zorder = 3)
 # Layout formatting
-plt.legend(loc='upper left', bbox_to_anchor=(0.08, 1.0))
+plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
 # plt.title("User satisfaction levels in application processing request")
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("User satisfaction (%)")
+plt.xlabel("Orchestration Solutions", fontsize=12)
+plt.ylabel("User satisfaction (%)", fontsize=12)
+plt.xticks(fontsize=12, rotation=45)
+plt.yticks(fontsize=12)
+plt.tight_layout()
+sns.despine()
 plt.grid(zorder = 0)
 # Show or save
 save_file=path+'satisfaction_rate_solo-nous.pdf'
@@ -95,12 +103,16 @@ plt.close()
 # # Same ops but for compare against a subset
 group_order = ['25-multi','50-multi', '75-multi', 'FaIRMEC']
 filtered_data = plotting_data.loc[group_order]
-filtered_data.plot(kind='bar', width=0.8, figsize=(6, 6), zorder = 3)
+filtered_data.plot(kind='bar', width=0.9, figsize=(6, 5), zorder = 3)
 # Layout formatting
-plt.legend(loc='upper left', bbox_to_anchor=(0.08, 1.0))
+plt.legend(loc='upper left', bbox_to_anchor=(1.0, 0.5),title='#Orchestrators',title_fontsize='12', fontsize=12)
 # plt.title("User satisfaction levels in application processing request")
-plt.xlabel("Orchestration Solutions")
-plt.ylabel("User satisfaction (%)")
+plt.xlabel("Orchestration Solutions", fontsize=12)
+plt.ylabel("User satisfaction (%)", fontsize=12)
+plt.xticks(fontsize=12, rotation=45)
+plt.yticks(fontsize=12)
+plt.tight_layout()
+sns.despine()
 plt.grid(zorder = 0)
 # Show or save
 save_file=path+'satisfaction_rate_multi-nous.pdf'
