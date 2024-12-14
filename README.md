@@ -1,1 +1,1 @@
-# GT4EdgeFeder
+# FAIRMEC repository
